@@ -37,14 +37,25 @@ class Home extends StatefulWidget {
   _HomeState createState() => new _HomeState();
 }
 
-class _HomeState extends State<Home> {
-  Future<Directory> _extDir;
+class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin<Home> {
+  Future<Directory> extDir;
   String kUrl;
 
-  void _requestExtDirectory() {
-    setState(() {
-      _extDir = getExternalStorageDirectory();
-    });
+  List musicFiles = [];
+
+  @override
+  bool get wantKeepAlive => true;
+
+  _requestExtDirectory() {
+    var dir = getExternalStorageDirectory();
+    return dir;
+  }
+  
+  _getExtDirectory() {
+    var dir = getExternalStorageDirectory().then((actualDir) {
+      return actualDir;
+    }
+    );
   }
 
   AudioPlayer audioPlayer;
@@ -53,7 +64,6 @@ class _HomeState extends State<Home> {
   void initAudioPlayer() {
     audioPlayer = new AudioPlayer();
   }
-
   Widget _buildDirectory(BuildContext context, AsyncSnapshot<Directory> snapshot) {
     Text text = const Text('');
     if (snapshot.connectionState == ConnectionState.done) {
@@ -66,18 +76,19 @@ class _HomeState extends State<Home> {
       }
     }
 
-    List musicFiles = [];
-
-    var mainDir = Directory(snapshot.data.path);
-    List contents = mainDir.listSync(recursive: true);
-    for (var fileOrDir in contents) {
-      if (fileOrDir.path.toString().endsWith(".mp3")) {
-        musicFiles.add(fileOrDir.path);
+    if (musicFiles.isEmpty == true) {
+      var mainDir = Directory(snapshot.data.path);
+      List contents = mainDir.listSync(recursive: true);
+      for (var fileOrDir in contents) {
+        if (fileOrDir.path.toString().endsWith(".mp3")) {
+          musicFiles.add(fileOrDir.path);
+        }
       }
+    } else {
+
     }
 
     print(musicFiles);
-
     return new ListView.builder(
         itemCount: musicFiles.length,
         itemBuilder: (BuildContext context, int index) {
@@ -89,9 +100,7 @@ class _HomeState extends State<Home> {
               play();
               Navigator.of(context).push(
                   MaterialPageRoute(
-                      builder: (BuildContext context) => new PlayingPage(
-                        
-                      )
+                      builder: (BuildContext context) => new PlayingPage()
                   )
               );
           },
@@ -103,16 +112,15 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    _requestExtDirectory();
+    extDir = _requestExtDirectory();
     initAudioPlayer();
+    Directory extDir2 = _getExtDirectory();
+    print(extDir2);
   }
 
   Future play() async {
     kUrl = '/storage/emulated/0/Epicano - Ocean.mp3';
     await audioPlayer.play(kUrl, isLocal: true);
-    setState(() {
-      playerState = PlayerState.playing;
-    });
   }
 
   @override
@@ -125,7 +133,7 @@ class _HomeState extends State<Home> {
             Expanded(
               child: FutureBuilder<Directory>(
                 builder: _buildDirectory,
-                future: _extDir,
+                future: extDir,
               )
             )
           ],
