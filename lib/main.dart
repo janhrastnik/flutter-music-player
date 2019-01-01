@@ -5,14 +5,35 @@ import 'package:audioplayer/audioplayer.dart';
 import 'dart:io';
 import 'package:mp3_meta_data/mp3_meta_data.dart';
 import 'dart:typed_data';
+import 'package:flutter/services.dart';
 
 void main() => runApp(new MyApp());
 
 enum PlayerState { stopped, playing, paused }
+AudioPlayer audioPlayer;
+PlayerState playerState;
+
+Future play(url) async {
+  await audioPlayer.play(url, isLocal: true);
+}
+
+Future pause() async {
+  await audioPlayer.pause();
+}
+
+Future stop() async {
+  await audioPlayer.stop();
+}
+
+void hideAppBar() {
+  SystemChrome.setEnabledSystemUIOverlays([]);
+}
 
 class MyApp extends StatelessWidget {
+
   @override
   Widget build(BuildContext context) {
+    hideAppBar();
     return HomePage();
   }
 }
@@ -39,7 +60,9 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin<Home> {
   Future<Directory> extDir;
+  Directory extDir2;
   String kUrl;
+  Uint8List image1;
 
   List musicFiles = [];
 
@@ -51,33 +74,23 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin<Home> {
     return dir;
   }
   
-  _getExtDirectory() {
-    var dir = getExternalStorageDirectory().then((actualDir) {
-      return actualDir;
-    }
-    );
+  _getExtDirectory() async {
+    await getExternalStorageDirectory().then((dir) {
+      setState(() {
+        extDir2 = dir;
+        print("extdir2 is " + extDir2.toString());
+      });
+    });
   }
-
-  AudioPlayer audioPlayer;
-  PlayerState playerState;
 
   void initAudioPlayer() {
     audioPlayer = new AudioPlayer();
   }
-  Widget _buildDirectory(BuildContext context, AsyncSnapshot<Directory> snapshot) {
-    Text text = const Text('');
-    if (snapshot.connectionState == ConnectionState.done) {
-      if (snapshot.hasError) {
-        text = new Text('Error: ${snapshot.error}');
-      } else if (snapshot.hasData) {
-        text = new Text('path: ${snapshot.data.path}');
-      } else {
-        text = const Text('path unavailable');
-      }
-    }
-
+  // gets the music files
+  
+  void getFiles() {
     if (musicFiles.isEmpty == true) {
-      var mainDir = Directory(snapshot.data.path);
+      var mainDir = Directory(extDir2.path);
       List contents = mainDir.listSync(recursive: true);
       for (var fileOrDir in contents) {
         if (fileOrDir.path.toString().endsWith(".mp3")) {
@@ -87,26 +100,7 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin<Home> {
     } else {
 
     }
-
     print(musicFiles);
-    return new ListView.builder(
-        itemCount: musicFiles.length,
-        itemBuilder: (BuildContext context, int index) {
-          var missingImg = AssetImage("assets/noimage.png");
-          return new ListTile(
-            leading: Image(image: missingImg, width: 60.0, height: 60.0,),
-            title: Text(musicFiles[index]),
-            onTap: () {
-              play();
-              Navigator.of(context).push(
-                  MaterialPageRoute(
-                      builder: (BuildContext context) => new PlayingPage()
-                  )
-              );
-          },
-          );
-        }
-    );
   }
 
   @override
@@ -114,42 +108,129 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin<Home> {
     super.initState();
     extDir = _requestExtDirectory();
     initAudioPlayer();
-    Directory extDir2 = _getExtDirectory();
-    print(extDir2);
-  }
-
-  Future play() async {
-    kUrl = '/storage/emulated/0/Epicano - Ocean.mp3';
-    await audioPlayer.play(kUrl, isLocal: true);
+    _getExtDirectory();
   }
 
   @override
   Widget build(BuildContext context) {
+    getFiles();
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: Text("musicplayer2")),
         body: Column(
           children: <Widget>[
             Expanded(
-              child: FutureBuilder<Directory>(
-                builder: _buildDirectory,
-                future: extDir,
+              child: ListView.builder(
+                itemCount: musicFiles.length,
+                itemBuilder: (BuildContext context, int index) {
+                  var missingImg = AssetImage("assets/noimage.png");
+                  return new ListTile(
+                    leading: Image(image: missingImg, width: 60.0, height: 60.0,),
+                    title: Text(musicFiles[index]),
+                    onTap: () async {
+                      try {
+                        image1 = await Mp3MetaData.getAlbumArt(musicFiles[index]);
+                      } catch(e) {
+
+                      }
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (BuildContext context) => new PlayingPage(
+                            filePath: musicFiles[index],
+                            image: image1,
+                          )
+                        )
+                      );
+                    },
+                  );
+                }
               )
             )
-          ],
-        ),
-      ),
+          ]
+        )
+      )
     );
   }
 }
 
-class PlayingPage extends StatelessWidget {
+class PlayingPage extends StatefulWidget {
+  var filePath;
+  var image;
+
+  PlayingPage({Key key, @required String this.filePath, this.image}) : super(key: key);
+
+  PlayingPageState createState() => PlayingPageState();
+}
+
+class PlayingPageState extends State<PlayingPage> {
+  var _metaData;
+  static const platform = const MethodChannel('demo.janhrastnik.com/info');
+  @override
+  void initState() {
+    super.initState();
+    stop();
+    play(widget.filePath);
+    playerState = PlayerState.playing;
+    _getMetaData().then((String data) {
+      setState(() {
+        _metaData = data;
+      });
+    });
+  }
+
+  get isPlaying => playerState == PlayerState.playing;
+  get isPaused => playerState == PlayerState.paused;
+
+  getIcon() {
+    if (isPlaying == true) {
+      return Icon(Icons.pause);
+    } else {
+      return Icon(Icons.play_arrow);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    var missingImg = AssetImage("assets/noimage.png");
     return MaterialApp(
       home: Scaffold(
-        body: Text("yeet"),
+        body: Column(
+          children: <Widget>[
+            widget.image != null ? Image.memory(widget.image) : Image(image: missingImg,),
+            Text("song name placeholder"),
+            InkWell(
+              child: getIcon(),
+              onTap: () {
+                if (isPlaying == true) {
+                  pause();
+                  setState(() {
+                    playerState = PlayerState.paused;
+                  });
+                } else {
+                  stop();
+                  play(widget.filePath);
+                  setState(() {
+                    playerState = PlayerState.playing;
+                  });
+                }
+              },
+            ),
+            Text(_metaData)
+          ],
+        )
       ),
     );
+  }
+
+  Future<String> _getMetaData() async {
+    String value;
+    try {
+      value = await platform.invokeMethod("getMetaData", <String, dynamic>{
+        'filepath': widget.filePath
+      });
+    } catch(e) {
+      print(e);
+    }
+    return value;
   }
 }
