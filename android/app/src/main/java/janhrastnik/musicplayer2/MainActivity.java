@@ -9,6 +9,8 @@ import io.flutter.plugins.GeneratedPluginRegistrant;
 import com.mpatric.mp3agic.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends FlutterActivity {
@@ -26,12 +28,21 @@ public class MainActivity extends FlutterActivity {
         Map<String, Object> arguments = methodCall.arguments();
         String message = "ayyy";
         MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-
+        List<List> metadata = new ArrayList<List>();
         if (methodCall.method.equals("getMetaData")) {
-          String filepath = (String) arguments.get("filepath");
-          mmr.setDataSource(filepath);
-          String title = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
-          result.success(title);
+          List<String> filepaths = (ArrayList<String>) arguments.get("filepaths");
+          System.out.println("the received filepaths are " + filepaths);
+          for (String filepath : filepaths) {
+            List<String> l = new ArrayList<String>();
+            mmr.setDataSource(filepath);
+            String title = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+            String artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+            l.add(title);
+            l.add(artist);
+            metadata.add(l);
+          }
+          System.out.println("the metadata is " + metadata);
+          result.success(metadata);
         }
 
       }
