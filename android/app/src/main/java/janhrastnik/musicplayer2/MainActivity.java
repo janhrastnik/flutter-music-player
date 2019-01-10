@@ -28,20 +28,20 @@ public class MainActivity extends FlutterActivity {
         Map<String, Object> arguments = methodCall.arguments();
         String message = "ayyy";
         MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-        List<List> metadata = new ArrayList<List>();
+        List<List> metadata = new ArrayList();
         if (methodCall.method.equals("getMetaData")) {
           List<String> filepaths = (ArrayList<String>) arguments.get("filepaths");
           System.out.println("the received filepaths are " + filepaths);
           for (String filepath : filepaths) {
-            List<String> l = new ArrayList<String>();
+            List<String> l = new ArrayList();
             mmr.setDataSource(filepath);
             String title = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
             String artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
             l.add(title);
             l.add(artist);
+            l.add(title);
             metadata.add(l);
           }
-          System.out.println("the metadata is " + metadata);
           result.success(metadata);
         }
 
