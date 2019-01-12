@@ -23,6 +23,7 @@ dependencies:
   path_provider: ^0.4.1
   audioplayer: ^0.5.2
   mp3_meta_data: ^0.0.1
+  shared_preferences: ^0.4.3
 
 dev_dependencies:
   flutter_test:
@@ -40,7 +41,7 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
-    - assets/
+    - images/
   # To add assets to your application, add an assets section, like this:
   # assets:
   #  - images/a_dot_burr.jpeg

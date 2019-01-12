@@ -1,32 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:audioplayer/audioplayer.dart';
-import 'dart:io';
-import 'package:mp3_meta_data/mp3_meta_data.dart';
-import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'dart:async';
-import 'playlist.dart' as playlist;
+import 'audioplayer.dart' as audioplayer;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:audioplayer/audioplayer.dart';
 
-enum PlayerState { stopped, playing, paused }
-AudioPlayer audioPlayer;
-PlayerState playerState;
-Duration duration;
-Duration position;
+String img = "images/noimage.png";
 
-Future play(url) async {
-  await audioPlayer.play(url, isLocal: true);
+Future<bool> saveFavTrack(String name) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  prefs.setString("name", name);
 }
 
-Future pause() async {
-  await audioPlayer.pause();
+Future getFavTrackList() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String name = prefs.getString("name");
+  return name;
 }
-
-Future stop() async {
-  await audioPlayer.stop();
-}
-
-var missImg = "https://upload.wikimedia.org/wikipedia/commons/2/26/512pxIcon-sunset_photo_not_found.png";
 
 class Library extends StatefulWidget {
   List metadata;
@@ -39,59 +29,48 @@ class Library extends StatefulWidget {
 }
 
 class _LibraryState extends State<Library>{
-
   StreamSubscription _positionSubscription;
   StreamSubscription _audioPlayerStateSubscription;
   static const platform = const MethodChannel('demo.janhrastnik.com/info');
 
   void initAudioPlayer() {
-    audioPlayer = new AudioPlayer();
-    _positionSubscription = audioPlayer.onAudioPositionChanged
-        .listen((p) => setState(() => position = p));
+    audioplayer.audioPlayer = new AudioPlayer();
+    _positionSubscription = audioplayer.audioPlayer.onAudioPositionChanged
+        .listen((p) => setState(() => audioplayer.position = p));
     _audioPlayerStateSubscription =
-        audioPlayer.onPlayerStateChanged.listen((s) {
+        audioplayer.audioPlayer.onPlayerStateChanged.listen((s) {
           if (s == AudioPlayerState.PLAYING) {
-            setState(() => duration = audioPlayer.duration);
+            setState(() =>
+            audioplayer.duration = audioplayer.audioPlayer.duration);
           } else if (s == AudioPlayerState.STOPPED) {
-            onComplete();
             setState(() {
-              position = duration;
+              audioplayer.position = audioplayer.duration;
             });
           }
         }, onError: (msg) {
           setState(() {
-            // playerState = PlayerState.stopped;
-            duration = new Duration(seconds: 0);
-            position = new Duration(seconds: 0);
+            // audioplayer.playerState = PlayerState.stopped;
+            audioplayer.duration = new Duration(seconds: 0);
+            audioplayer.position = new Duration(seconds: 0);
           });
         });
-
   }
 
   void onComplete() {
-    // setState(() => playerState = PlayerState.stopped);
-  }
-
-
-  @override
-  void dispose() {
-    _positionSubscription.cancel();
-    _audioPlayerStateSubscription.cancel();
-    audioPlayer.stop();
-    super.dispose();
+    // setState(() => audioplayer.playerState = PlayerState.stopped);
   }
 
   @override
   void initState() {
     super.initState();
     initAudioPlayer();
-    print("in library, playerstate is ${playerState.toString()}");
+    print("in library, playerstate is ${audioplayer.playerState.toString()}");
   }
 
   getTitle(i) {
-    try {
+    if (widget.metadata[i][0] != null) {
       return Text(widget.metadata[i][0]);
-    } catch(e) {
+    } else {
       String s = widget.musicFiles[i];
       for (var i = s.length; i > 0; i--) {
         if (s.substring(i-2, i-1) == "/") {
@@ -102,23 +81,23 @@ class _LibraryState extends State<Library>{
   }
 
   getSubTitle(i) {
-    try {
+    if (widget.metadata[i][1] != null) {
       return Text(widget.metadata[i][1]);
-    } catch(e) {
+    } else {
       return Text("unknown");
     }
   }
 
   getImage(i) {
-    try {
+    if (widget.metadata[i][2]!= "") {
       return Image.memory(widget.metadata[i][2], width: MediaQuery.of(context).size.width/7,);
-    } catch(e) {
-      return Image.network(missImg, width: MediaQuery.of(context).size.width/7,);
+    } else {
+      return Image.asset(img, width: MediaQuery.of(context).size.width/7);
     }
   }
 
   PlayerInfo() {
-    if (playerState == PlayerState.playing || playerState == PlayerState.paused) {
+    if (audioplayer.playerState == audioplayer.PlayerState.playing || audioplayer.playerState == audioplayer.PlayerState.paused) {
       return
         Container(
             decoration: BoxDecoration(
@@ -141,12 +120,12 @@ class _LibraryState extends State<Library>{
                     ),
                     Expanded(
                       child: Text("${
-                          widget.metadata[playlist.currTrack][0] != null
-                              ? widget.metadata[playlist.currTrack][0]
-                              : widget.musicFiles[playlist.currTrack]
+                          widget.metadata[audioplayer.currTrack][0] != null
+                              ? widget.metadata[audioplayer.currTrack][0]
+                              : widget.musicFiles[audioplayer.currTrack]
                       } by ${
-                          widget.metadata[playlist.currTrack][1] != null
-                              ? widget.metadata[playlist.currTrack][1]
+                          widget.metadata[audioplayer.currTrack][1] != null
+                              ? widget.metadata[audioplayer.currTrack][1]
                               : "unknown"
                       }",
                         style: TextStyle(
@@ -157,44 +136,46 @@ class _LibraryState extends State<Library>{
                     getIcon()
                   ],
                   ),
-                  duration == null
+                  audioplayer.duration == null
                       ? Container()
                       : Slider(
-                      value: position?.inMilliseconds?.toDouble() ?? 0.0,
+                      value: audioplayer.position?.inMilliseconds?.toDouble() ?? 0.0,
                       onChanged: (double value) {
-                        play(widget.musicFiles[playlist.currTrack]);
-                        playerState = PlayerState.playing;
-                        audioPlayer.seek((value / 1000).roundToDouble());
+                        audioplayer.play(widget.musicFiles[audioplayer.currTrack]);
+                        audioplayer.playerState = audioplayer.PlayerState.playing;
+                        audioplayer.audioPlayer.seek((value / 1000).roundToDouble());
                       },
                       min: 0.0,
-                      max: duration.inMilliseconds.toDouble()),
+                      max: audioplayer.duration.inMilliseconds.toDouble()),
                 ],
               ),
       );
     } else {
-      return Container();
+      return Container(
+        color: Colors.yellow,
+      );
     }
   }
 
   getIcon() {
-    if (playerState == PlayerState.playing) {
+    if (audioplayer.playerState == audioplayer.PlayerState.playing) {
       return InkWell(
             child: Icon(Icons.pause, size: 30.0,),
             onTap: () {
-              pause();
+              audioplayer.pause();
               setState(() {
-                playerState = PlayerState.paused;
+                audioplayer.playerState = audioplayer.PlayerState.paused;
               });
 
             }
         );
-    } else if (playerState == PlayerState.paused) {
+    } else if (audioplayer.playerState == audioplayer.PlayerState.paused) {
       return InkWell(
             child: Icon(Icons.play_arrow, size: 30.0,),
             onTap: () {
-              play(widget.musicFiles[playlist.currTrack]);
+              audioplayer.play(widget.musicFiles[audioplayer.currTrack]);
               setState(() {
-                playerState = PlayerState.playing;
+                audioplayer.playerState = audioplayer.PlayerState.playing;
               });
 
             }
@@ -218,9 +199,9 @@ class _LibraryState extends State<Library>{
                               title: getTitle(index),
                               subtitle: getSubTitle(index),
                               onTap: () {
-                                playlist.fileList = widget.musicFiles;
-                                playlist.currTrack = index;
-                                playlist.metaData = widget.metadata;
+                                audioplayer.fileList = widget.musicFiles;
+                                audioplayer.currTrack = index;
+                                audioplayer.metaData = widget.metadata;
                                 Navigator.of(context).push(
                                     MaterialPageRoute(
                                         builder: (BuildContext context) => new PlayingPage(
@@ -248,41 +229,43 @@ class PlayingPage extends StatefulWidget {
   var image;
   var fileMetaData;
 
-  PlayingPage({Key key, @required String this.filePath, this.image, this.fileMetaData}) : super(key: key);
+  PlayingPage({Key key, @required this.filePath, this.image, this.fileMetaData}) : super(key: key);
 
   PlayingPageState createState() => PlayingPageState();
 }
 
 class PlayingPageState extends State<PlayingPage> {
-  var missingImg = AssetImage("assets/noimage.png");
+  String _name;
+  var missingImg = AssetImage("images/noimage.png");
   @override
   void initState() {
     super.initState();
-    duration = new Duration(seconds: 0);
-    position = new Duration(seconds: 0);
-    print("playerstate is ${playerState.toString()}");
-    stop();
-    play(widget.filePath);
-    playerState = PlayerState.playing;
-    print("on playing page, playerstate is ${playerState.toString()}");
+    audioplayer.duration = new Duration(seconds: 0);
+    audioplayer.position = new Duration(seconds: 0);
+    audioplayer.stop();
+    audioplayer.play(widget.filePath);
+    audioplayer.playerState = audioplayer.PlayerState.playing;
+    getFavTrackList().then((name) {
+      this._name = name;
+    });
   }
 
-  get isPlaying => playerState == PlayerState.playing;
-  get isPaused => playerState == PlayerState.paused;
+  get isPlaying => audioplayer.playerState == audioplayer.PlayerState.playing;
+  get isPaused => audioplayer.playerState == audioplayer.PlayerState.paused;
   get durationText =>
-      duration != null ? duration.toString().split('.').first : '';
+      audioplayer.duration != null ? audioplayer.duration.toString().split('.').first : '';
   get positionText =>
-      position != null ? position.toString().split('.').first : '';
+      audioplayer.position != null ? audioplayer.position.toString().split('.').first : '';
 
   getIcon() {
-    if (isPlaying == true || playerState == PlayerState.stopped) {
+    if (isPlaying == true || audioplayer.playerState == audioplayer.PlayerState.stopped) {
       return Padding(
         child: InkWell(
             child: Icon(Icons.pause, size: 50.0,),
             onTap: () {
-              pause();
+              audioplayer.pause();
               setState(() {
-                playerState = PlayerState.paused;
+                audioplayer.playerState = audioplayer.PlayerState.paused;
               });
 
             }
@@ -294,9 +277,9 @@ class PlayingPageState extends State<PlayingPage> {
         child: InkWell(
             child: Icon(Icons.play_arrow, size: 50.0,),
             onTap: () {
-              play(widget.filePath);
+              audioplayer.play(widget.filePath);
               setState(() {
-                playerState = PlayerState.playing;
+                audioplayer.playerState = audioplayer.PlayerState.playing;
               });
 
             }
@@ -324,8 +307,8 @@ class PlayingPageState extends State<PlayingPage> {
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (BuildContext context) => Library(
-                      musicFiles: playlist.fileList,
-                      metadata: playlist.metaData,
+                      musicFiles: audioplayer.fileList,
+                      metadata: audioplayer.metaData,
                   )
               ));
             },
@@ -362,14 +345,14 @@ class PlayingPageState extends State<PlayingPage> {
                   child: InkWell(
                     child: Icon(Icons.skip_previous, size: 30.0, color: Colors.blueGrey,),
                     onTap: () {
-                      if (playlist.currTrack != 0) {
-                        playlist.currTrack--;
+                      if (audioplayer.currTrack != 0) {
+                        audioplayer.currTrack--;
                         Navigator.of(context).push(MaterialPageRoute(
                             builder: (BuildContext context) => PlayingPage(
-                                filePath: playlist.fileList[playlist.currTrack],
-                                image: playlist.metaData[playlist.currTrack][2],
-                                fileMetaData: playlist.metaData[playlist.currTrack][0] != null
-                                  ? playlist.metaData[playlist.currTrack] : [playlist.fileList[playlist.currTrack], "unknown"],
+                                filePath: audioplayer.fileList[audioplayer.currTrack],
+                                image: audioplayer.metaData[audioplayer.currTrack][2],
+                                fileMetaData: audioplayer.metaData[audioplayer.currTrack][0] != null
+                                  ? audioplayer.metaData[audioplayer.currTrack] : [audioplayer.fileList[audioplayer.currTrack], "unknown"],
                             )
                         )
                         );
@@ -383,9 +366,9 @@ class PlayingPageState extends State<PlayingPage> {
                     child: Icon(Icons.history, size: 50.0),
                     onTap: () {
                       setState(() {
-                        audioPlayer.seek(0.0);
-                        play(widget.filePath);
-                        playerState = PlayerState.playing;
+                        audioplayer.audioPlayer.seek(0.0);
+                        audioplayer.play(widget.filePath);
+                        audioplayer.playerState = audioplayer.PlayerState.playing;
                       });
                     },
                   ),
@@ -396,14 +379,14 @@ class PlayingPageState extends State<PlayingPage> {
                   child: InkWell(
                     child: Icon(Icons.skip_next, size: 30.0, color: Colors.blueGrey,),
                     onTap: () {
-                      if (playlist.currTrack != playlist.fileList.length-1) {
-                        playlist.currTrack++;
+                      if (audioplayer.currTrack != audioplayer.fileList.length-1) {
+                        audioplayer.currTrack++;
                         Navigator.of(context).push(MaterialPageRoute(
                             builder: (BuildContext context) => PlayingPage(
-                              filePath: playlist.fileList[playlist.currTrack],
-                              image: playlist.metaData[playlist.currTrack][2],
-                              fileMetaData: playlist.metaData[playlist.currTrack][0] != null
-                                  ? playlist.metaData[playlist.currTrack] : [playlist.fileList[playlist.currTrack], "unknown"],
+                              filePath: audioplayer.fileList[audioplayer.currTrack],
+                              image: audioplayer.metaData[audioplayer.currTrack][2],
+                              fileMetaData: audioplayer.metaData[audioplayer.currTrack][0] != null
+                                  ? audioplayer.metaData[audioplayer.currTrack] : [audioplayer.fileList[audioplayer.currTrack], "unknown"],
                             )
                         )
                         );
@@ -413,22 +396,22 @@ class PlayingPageState extends State<PlayingPage> {
                 ),
             ],
             ),
-            duration == null
+            audioplayer.duration == null
                 ? Container()
                 : Slider(
-                value: position?.inMilliseconds?.toDouble() ?? 0.0,
+                value: audioplayer.position?.inMilliseconds?.toDouble() ?? 0.0,
                 onChanged: (double value) {
-                  play(widget.filePath);
-                  playerState = PlayerState.playing;
-                  audioPlayer.seek((value / 1000).roundToDouble());
+                  audioplayer.play(widget.filePath);
+                  audioplayer.playerState = audioplayer.PlayerState.playing;
+                  audioplayer.audioPlayer.seek((value / 1000).roundToDouble());
                 },
                 min: 0.0,
-                max: duration.inMilliseconds.toDouble()),
+                max: audioplayer.duration.inMilliseconds.toDouble()),
                 new Text(
-                position != null
+                audioplayer.position != null
                     ? "${positionText ?? ''} / ${durationText ?? ''}"
-                    : duration != null ? durationText : '',
-                style: new TextStyle(fontSize: 24.0))
+                    : audioplayer.duration != null ? durationText : '',
+                style: new TextStyle(fontSize: 24.0)),
           ],
         )
     );

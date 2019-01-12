@@ -39,7 +39,7 @@ public class MainActivity extends FlutterActivity {
             String artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
             l.add(title);
             l.add(artist);
-            l.add(title);
+            l.add("");
             metadata.add(l);
           }
           result.success(metadata);

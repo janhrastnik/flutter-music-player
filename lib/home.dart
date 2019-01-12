@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:simple_permissions/simple_permissions.dart';
 import 'dart:io';
 import 'package:mp3_meta_data/mp3_meta_data.dart';
 import 'dart:typed_data';
@@ -7,6 +6,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
 import 'library.dart';
+import 'audioplayer.dart' as audioplayer;
+import 'package:audioplayer/audioplayer.dart';
 
 class HomePage extends StatefulWidget {
   HomePageState createState() => HomePageState();
@@ -21,6 +22,31 @@ class HomePageState extends State<HomePage> {
   List _metaData;
   static const platform = const MethodChannel('demo.janhrastnik.com/info');
   List musicFiles = [];
+  StreamSubscription _positionSubscription;
+  StreamSubscription _audioPlayerStateSubscription;
+
+  void initAudioPlayer() {
+    audioplayer.audioPlayer = new AudioPlayer();
+    _positionSubscription = audioplayer.audioPlayer.onAudioPositionChanged
+        .listen((p) => setState(() => audioplayer.position = p));
+    _audioPlayerStateSubscription =
+        audioplayer.audioPlayer.onPlayerStateChanged.listen((s) {
+          if (s == AudioPlayerState.PLAYING) {
+            setState(() =>
+            audioplayer.duration = audioplayer.audioPlayer.duration);
+          } else if (s == AudioPlayerState.STOPPED) {
+            setState(() {
+              audioplayer.position = audioplayer.duration;
+            });
+          }
+        }, onError: (msg) {
+          setState(() {
+            // audioplayer.playerState = PlayerState.stopped;
+            audioplayer.duration = new Duration(seconds: 0);
+            audioplayer.position = new Duration(seconds: 0);
+          });
+        });
+  }
 
   _requestExtDirectory() {
     var dir = getExternalStorageDirectory();
@@ -32,6 +58,7 @@ class HomePageState extends State<HomePage> {
     super.initState();
     extDir = _requestExtDirectory();
     wrap();
+    initAudioPlayer();
   }
 
   void wrap() async {
