@@ -97,7 +97,7 @@ class SplashScreenState extends State<SplashScreen> {
   }
 
   onDoneLoading() async {
-    Navigator.of(context).push(MaterialPageRoute(builder: (context) => HomePage()));
+    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => HomePage()));
   }
 
   @override

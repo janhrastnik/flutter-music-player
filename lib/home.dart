@@ -124,7 +124,7 @@ class HomePageState extends State<HomePage> {
                         padding: EdgeInsets.only(bottom: 40.0, top: 40.0),
                         child: Card(
                           child: Material(
-                            color: Colors.lightBlueAccent,
+                            color: index == audioplayer.currTrack ? Colors.limeAccent : Colors.lightBlueAccent,
                             child: InkWell(
                               child: Column(
                                 children: <Widget>[
