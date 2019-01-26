@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:simple_permissions/simple_permissions.dart';
 import 'package:flutter/services.dart';
 import 'home.dart';
+import 'splashpage.dart';
 
 void main() => runApp(new MyApp());
 
@@ -21,7 +22,8 @@ class MyApp extends StatelessWidget {
     _requestExtStorage(permission);
     hideAppBar();
     return MaterialApp(
-      home: HomePage(),
+      debugShowCheckedModeBanner: false,
+      home: SplashScreen(),
     );
   }
 }

@@ -8,20 +8,14 @@ import 'dart:async';
 import 'library.dart';
 import 'audioplayer.dart' as audioplayer;
 import 'package:audioplayer/audioplayer.dart';
+import 'favourites.dart';
+import 'playingpage.dart';
 
 class HomePage extends StatefulWidget {
   HomePageState createState() => HomePageState();
 }
 
 class HomePageState extends State<HomePage> {
-
-  Future<Directory> extDir;
-  Directory extDir2;
-  String kUrl;
-  Uint8List image1;
-  List _metaData;
-  static const platform = const MethodChannel('demo.janhrastnik.com/info');
-  List musicFiles = [];
   StreamSubscription _positionSubscription;
   StreamSubscription _audioPlayerStateSubscription;
 
@@ -48,132 +42,166 @@ class HomePageState extends State<HomePage> {
         });
   }
 
-  _requestExtDirectory() {
-    var dir = getExternalStorageDirectory();
-    return dir;
+  @override
+  void dispose() {
+    _positionSubscription.cancel();
+    _audioPlayerStateSubscription.cancel();
+    audioplayer.audioPlayer.stop();
+    super.dispose();
   }
 
   @override
   void initState() {
     super.initState();
-    extDir = _requestExtDirectory();
-    wrap();
     initAudioPlayer();
-  }
-
-  void wrap() async {
-    await getFiles();
-    _getMetaData().then((data) {
-      setState(() {
-        _metaData = data;
-      });
-      // print("metaData is: " + _metaData[0].toString());
+    audioplayer.getFavTrackList().then((l) {
+      audioplayer.favList = l;
     });
-    for (var i = 0; i < musicFiles.length; i++) {
-      try {
-        image1 = await Mp3MetaData.getAlbumArt(musicFiles[i]);
-        _metaData[i][2] = image1;
-      } catch(e) {
-      }
-    }
-  }
-
-  void getFiles() async {
-    await getExternalStorageDirectory().then((data) {
-      extDir2 = data;
-      setState(() {
-        if (musicFiles.isEmpty == true) {
-          var mainDir = Directory(extDir2.path);
-          List contents = mainDir.listSync(recursive: true);
-          for (var fileOrDir in contents) {
-            if (fileOrDir.path.toString().endsWith(".mp3")) {
-              musicFiles.add(fileOrDir.path);
-            }
-          }
-        } else {
-        }
-      });
-    });
-    // print("musicfiles are: " + musicFiles.toString());
-  }
-
-  Future _getMetaData() async {
-    var value;
-    try {
-      value = await platform.invokeMethod("getMetaData", <String, dynamic>{
-        'filepaths': musicFiles
-      });
-    } catch(e) {
-      // print(e);
-    }
-    // print("the extracted metadata is: " + value.toString());
-    return value;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: Drawer(
+        child: Column(
+          children: <Widget>[
+            InkWell(
+              child: ListTile(
+                title: Text("Home"),
+              ),
+              onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (BuildContext context) => HomePage()
+                )
+                );
+              },
+            ),
+            InkWell(
+              child: ListTile(
+                title: Text("Library"),
+              ),
+              onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (BuildContext context) => Library(
+                      musicFiles: audioplayer.allFilePaths,
+                      metadata: audioplayer.allMetaData,
+                    )
+                )
+                );
+              },
+            ),
+            InkWell(
+              child: ListTile(
+                title: Text("Favourites"),
+              ),
+              onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (BuildContext context) => FavouritesPage()
+                )
+                );
+              },
+            )
+          ],
+        ),
+      ),
         body: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisSize: MainAxisSize.max,
             children: <Widget>[
-              Expanded(
-                  child: GridView.count(
-                    crossAxisCount: 2,
-                    children: <Widget>[
-                      Padding(
-                        padding: EdgeInsets.all(10.0),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10.0),
-                            boxShadow: [
-                              BoxShadow(
-                                  color: Colors.grey,
-                                  // offset, the X,Y coordinates to offset the shadow
-                                  offset: Offset(0.0, 0.0),
-                                  // blurRadius, the higher the number the more smeared look
-                                  blurRadius: 10.0,
-                                  spreadRadius: 1.0)],
-                          ),
+                Padding(
+                  padding: EdgeInsets.only(top: 30.0),
+                  child: RichText(text: TextSpan(style: TextStyle(color: Colors.black), children: <TextSpan>[
+                      TextSpan(text: "Your Queue \n", style: TextStyle(fontSize: 22.0, height: 0.4)),
+                      TextSpan(text: "_________________", style: TextStyle(fontSize: 22.0, height: 0.4, color: Color.fromRGBO(200, 200, 200, 1.0))),
+                  ]), textAlign: TextAlign.center,),
+                ),
+                Expanded(
+                  child: audioplayer.metaData != null ? ListView.builder( // play queue
+                    itemCount: audioplayer.metaData.length,
+                    scrollDirection: Axis.horizontal,
+                    itemBuilder: (BuildContext context, int index) {
+                      return  Padding(
+                        padding: EdgeInsets.only(bottom: 40.0, top: 40.0),
+                        child: Card(
                           child: Material(
+                            color: Colors.lightBlueAccent,
                             child: InkWell(
-                              borderRadius: BorderRadius.circular(10.0),
+                              child: Column(
+                                children: <Widget>[
+                                  audioplayer.metaData[index][2] != "" ? Padding(padding: EdgeInsets.all(8.0), child: Image.memory(audioplayer.metaData[index][2], width: 75.0,))
+                                     : Container(),
+                                  Container(
+                                    padding: EdgeInsets.only(left: 5.0, right: 5.0),
+                                    width: 100.0,
+                                    child: Center(child: Text(
+                                      audioplayer.metaData[index][0],
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    )),
+                                  ),
+                                ],
+                              ),
                               onTap: () {
+                                audioplayer.currTrack = index;
                                 Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                      builder: (BuildContext context) => new Library(
-                                        metadata: _metaData,
-                                        musicFiles: musicFiles,
-                                      )
-                                  )
+                                    MaterialPageRoute(
+                                        builder: (BuildContext context) => new PlayingPage(
+                                          filePath: audioplayer.fileList[index],
+                                          image: audioplayer.metaData[index][2],
+                                          fileMetaData: audioplayer.metaData[index][0] != null ?
+                                          audioplayer.metaData[index] :
+                                          [audioplayer.metaData[index], "unknown"],
+                                          backPage: "homePage",
+                                        )
+                                    )
                                 );
                               },
-                              child: Container(
-                                child: Center(
-                                    child:Text("Library")),
-                              ),
-                            ),
-                            color: Colors.transparent,
+                            )
                           ),
+                        )
+                      );
+                    },
+                    ) : Padding(padding: EdgeInsets.all(80.0), child: Text("Your queue is empty", style: TextStyle(
+                      fontStyle: FontStyle.italic, color: Colors.grey),),
+                  )
+                ),
+                GridView.count(
+                  shrinkWrap: true,
+                    crossAxisCount: 2,
+                    children: <Widget>[
+                      Material(
+                        color: Colors.deepOrangeAccent,
+                        child: InkWell(
+                          child: Center(child: Text("Library"),),
+                          onTap: () {
+                            Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => Library(
+                              musicFiles: audioplayer.allFilePaths,
+                              metadata: audioplayer.allMetaData,
+                            ),));
+                          },
                         ),
                       ),
-                      GridBlock(
-                          route: "/PlaylistsList",
-                          blockTitle: "Playlists"
+                      Material(
+                        color: Colors.cyanAccent,
+                        child: InkWell(
+                          child: Center(child: Text("Favourites"),),
+                          onTap: () {
+                            Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => FavouritesPage(),));
+                          },
+                        ),
                       ),
-                      GridBlock(
-                          route: "/FavouritesList",
-                          blockTitle: "Favourites"
+                      Container(
+                        color: Colors.greenAccent,
                       ),
-                      GridBlock(
-                          route: "/AlbumsList",
-                          blockTitle: "Albums"
-                      ),
+                      Container(
+                        color: Colors.amberAccent,
+                      )
                     ],
-                  )
-              )
-            ]
-        )
-    );
+                  ),
+
+            ],
+                  ),
+                );
   }
 }
 
@@ -216,3 +244,16 @@ class GridBlock extends StatelessWidget {
     );
   }
 }
+
+/*
+audioplayer.metaData != null ? ListView.builder(
+                  shrinkWrap: true,
+                  scrollDirection: Axis.horizontal,
+                  itemCount: audioplayer.metaData.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return ListTile(
+                      title: Text("aaa"),
+                    );
+                  }
+                  ) : Container(child: null,),
+ */

@@ -31,7 +31,6 @@ public class MainActivity extends FlutterActivity {
         List<List> metadata = new ArrayList();
         if (methodCall.method.equals("getMetaData")) {
           List<String> filepaths = (ArrayList<String>) arguments.get("filepaths");
-          System.out.println("the received filepaths are " + filepaths);
           for (String filepath : filepaths) {
             List<String> l = new ArrayList();
             mmr.setDataSource(filepath);
