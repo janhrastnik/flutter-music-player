@@ -36,9 +36,12 @@ class PlayingPageState extends State<PlayingPage> {
     audioplayer.play(widget.filePath);
     audioplayer.playerState = audioplayer.PlayerState.playing;
     audioplayer.getFavTrackList().then((l) {
-      print(l.toString());
-      if (audioplayer.favList.contains(widget.filePath) == true) {
-        isFavorited = true;
+      if (audioplayer.favList != null) {
+        if (audioplayer.favList.contains(widget.filePath) == true) {
+          isFavorited = true;
+        } else {
+          isFavorited = false;
+        }
       } else {
         isFavorited = false;
       }
@@ -76,9 +79,16 @@ class PlayingPageState extends State<PlayingPage> {
       audioplayer.position != null ? audioplayer.position.toString().split('.').first : '';
 
   void saveFavTrack(String track, List trackList) async {
+    print("TRACKLISSSSSSSSSSSST: " + trackList.toString());
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (track != "") {
-      trackList.add(track);
+      try {
+        trackList.add(track);
+      } catch(e) {
+        print("YOYOYOYOOYOYO");
+        prefs.setStringList("favTracks", [track]);
+        return null;
+      }
     }
     prefs.setStringList("favTracks", trackList);
   }

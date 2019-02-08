@@ -16,8 +16,13 @@ class FavouritesPageState extends State<FavouritesPage>{
   @override
   void initState() {
     super.initState();
-    for (var track in audioplayer.favList) {
-      favListMetaData.add(audioplayer.allMetaData[audioplayer.allFilePaths.indexOf(track)]);
+    print("AUDIOPLAYER IS " + audioplayer.favList.toString());
+    if (audioplayer.favList != null) {
+      for (var track in audioplayer.favList) {
+        favListMetaData.add(audioplayer.allMetaData[audioplayer.allFilePaths.indexOf(track)]);
+      }
+    } else {
+
     }
   }
 
@@ -84,7 +89,7 @@ class FavouritesPageState extends State<FavouritesPage>{
               HomePage()
             ));}
       )),
-      body: audioplayer.favList.length != 0 ?
+      body: audioplayer.favList != null ?
       ListView.builder(
       itemCount: audioplayer.favList.length,
       itemBuilder: (BuildContext context, int index) {
@@ -112,7 +117,7 @@ class FavouritesPageState extends State<FavouritesPage>{
           },
         );
       },
-    ) : Container(child: Text("You haven't favourited any tracks yet."),)
+    ) : Center(child: Text("You haven't favourited any tracks yet."),)
     );
   }
 }
