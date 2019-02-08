@@ -26,7 +26,6 @@ public class MainActivity extends FlutterActivity {
       public void onMethodCall(MethodCall methodCall, MethodChannel.Result result) {
 
         Map<String, Object> arguments = methodCall.arguments();
-        String message = "ayyy";
         MediaMetadataRetriever mmr = new MediaMetadataRetriever();
         List<List> metadata = new ArrayList();
         if (methodCall.method.equals("getMetaData")) {

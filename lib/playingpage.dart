@@ -6,8 +6,10 @@ import 'library.dart';
 import 'favourites.dart';
 import 'home.dart';
 import 'package:audioplayer/audioplayer.dart';
+import 'playlistpage.dart';
 
 class PlayingPage extends StatefulWidget {
+  // TODO: REMOVE IMAGE, ITS ALREADY IN FILEMETADATA
   var filePath;
   var image;
   var fileMetaData;
@@ -183,6 +185,11 @@ class PlayingPageState extends State<PlayingPage> {
                 Navigator.of(context).push(MaterialPageRoute(
                     builder: (BuildContext context) =>
                         FavouritesPage()
+                ));
+              } else if (widget.backPage == "playlistPage") {
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (BuildContext context) =>
+                        PlaylistPage()
                 ));
               } else {
                 Navigator.of(context).push(MaterialPageRoute(

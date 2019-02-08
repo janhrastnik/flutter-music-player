@@ -50,7 +50,7 @@ class SplashScreenState extends State<SplashScreen> {
           }
         }
       });
-      print("metaData is: " + _metaData.toString());
+      // print("metaData is: " + _metaData.toString());
     });
     for (var i = 0; i < _musicFiles.length; i++) {
       try {

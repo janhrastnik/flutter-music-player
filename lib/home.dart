@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
-import 'package:mp3_meta_data/mp3_meta_data.dart';
-import 'dart:typed_data';
-import 'package:path_provider/path_provider.dart';
-import 'package:flutter/services.dart';
 import 'dart:async';
 import 'library.dart';
 import 'audioplayer.dart' as audioplayer;
 import 'package:audioplayer/audioplayer.dart';
 import 'favourites.dart';
 import 'playingpage.dart';
+import 'playlistpage.dart';
 
 class HomePage extends StatefulWidget {
   HomePageState createState() => HomePageState();
@@ -18,6 +14,7 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   StreamSubscription _positionSubscription;
   StreamSubscription _audioPlayerStateSubscription;
+  ScrollController _scrollController;
 
   void initAudioPlayer() {
     audioplayer.audioPlayer = new AudioPlayer();
@@ -50,13 +47,26 @@ class HomePageState extends State<HomePage> {
     super.dispose();
   }
 
+  scrollQueue() {
+    try {
+      _scrollController.jumpTo(audioplayer.currTrack * 108.0);
+    } catch(e) {
+
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    _scrollController = ScrollController();
     initAudioPlayer();
     audioplayer.getFavTrackList().then((l) {
       audioplayer.favList = l;
     });
+    audioplayer.getPlayListNames().then((l) {
+      audioplayer.playlistNames = l;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => scrollQueue());
   }
 
   @override
@@ -118,10 +128,11 @@ class HomePageState extends State<HomePage> {
                 Expanded(
                   child: audioplayer.metaData != null ? ListView.builder( // play queue
                     itemCount: audioplayer.metaData.length,
+                    controller: _scrollController,
                     scrollDirection: Axis.horizontal,
                     itemBuilder: (BuildContext context, int index) {
-                      return  Padding(
-                        padding: EdgeInsets.only(bottom: 40.0, top: 40.0),
+                      return Padding(
+                        padding: EdgeInsets.only(bottom: 40.0, top: 10.0),
                         child: Card(
                           child: Material(
                             color: index == audioplayer.currTrack ? Colors.limeAccent : Colors.lightBlueAccent,
@@ -161,7 +172,7 @@ class HomePageState extends State<HomePage> {
                         )
                       );
                     },
-                    ) : Padding(padding: EdgeInsets.all(80.0), child: Text("Your queue is empty", style: TextStyle(
+                    ) : Padding(padding: EdgeInsets.all(70.0), child: Text("Your queue is empty", style: TextStyle(
                       fontStyle: FontStyle.italic, color: Colors.grey),),
                   )
                 ),
@@ -190,15 +201,20 @@ class HomePageState extends State<HomePage> {
                           },
                         ),
                       ),
-                      Container(
+                      Material(
                         color: Colors.greenAccent,
+                        child: InkWell(
+                          child: Center(child: Text("Playlists"),),
+                          onTap: () {
+                            Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => PlaylistPage(),));
+                          },
+                        ),
                       ),
                       Container(
                         color: Colors.amberAccent,
                       )
                     ],
                   ),
-
             ],
                   ),
                 );

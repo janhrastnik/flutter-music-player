@@ -84,34 +84,35 @@ class FavouritesPageState extends State<FavouritesPage>{
               HomePage()
             ));}
       )),
-      body: ListView.builder(
-        itemCount: audioplayer.favList.length,
-        itemBuilder: (BuildContext context, int index) {
-          var track_metadata = favListMetaData[index];
-          return ListTile(
-            leading: getImage(index),
-            title: Text(track_metadata[0]),
-            subtitle: Text(track_metadata[1]),
-            onTap: () {
-              audioplayer.fileList = audioplayer.favList;
-              audioplayer.metaData = favListMetaData;
-              audioplayer.currTrack = index;
-              Navigator.of(context).push(
-                  MaterialPageRoute(
-                      builder: (BuildContext context) => new PlayingPage(
-                        filePath: audioplayer.favList[index],
-                        image: track_metadata[2],
-                        fileMetaData: track_metadata[0] != null ?
-                        track_metadata :
-                        [audioplayer.favList[index], "unknown"] ,
-                        backPage: "favouritesPage",
-                      )
-                  )
-              );
-            },
-          );
-        },
-      ),
+      body: audioplayer.favList.length != 0 ?
+      ListView.builder(
+      itemCount: audioplayer.favList.length,
+      itemBuilder: (BuildContext context, int index) {
+        var track_metadata = favListMetaData[index];
+        return ListTile(
+          leading: getImage(index),
+          title: Text(track_metadata[0]),
+          subtitle: Text(track_metadata[1]),
+          onTap: () {
+            audioplayer.fileList = audioplayer.favList;
+            audioplayer.metaData = favListMetaData;
+            audioplayer.currTrack = index;
+            Navigator.of(context).push(
+                MaterialPageRoute(
+                    builder: (BuildContext context) => new PlayingPage(
+                      filePath: audioplayer.favList[index],
+                      image: track_metadata[2],
+                      fileMetaData: track_metadata[0] != null ?
+                      track_metadata :
+                      [audioplayer.favList[index], "unknown"] ,
+                      backPage: "favouritesPage",
+                    )
+                )
+            );
+          },
+        );
+      },
+    ) : Container(child: Text("You haven't favourited any tracks yet."),)
     );
   }
 }
