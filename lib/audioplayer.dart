@@ -1,6 +1,11 @@
 library musicplayer2.audioplayer;
 import 'package:audioplayer/audioplayer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/material.dart';
+import 'home.dart';
+import 'playlistpage.dart';
+import 'favourites.dart';
+import 'library.dart';
 
 // for playlists
 List fileList;
@@ -42,6 +47,19 @@ Future getPlayList(name) async {
   return playList;
 }
 
+Future<List> loadPlaylistData() async {
+  List playlistTracks = [];
+  if (playlistNames != null) {
+    for (String name in playlistNames) { // we get tracks from all playlists from shared preferences
+      getPlayList(name).then((l) {
+        // print("l is " + l.toString());
+        playlistTracks.add(l);
+      });
+    }
+  }
+  return playlistTracks;
+}
+
 void savePlaylist(String name, List<String> CurrTrackList, List<String> trackList) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   // print("playlist name is " + name.toString());
@@ -65,4 +83,64 @@ Future pause() async {
 
 Future stop() async {
   await audioPlayer.stop();
+}
+
+class AppDrawer extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Drawer(
+      child: Column(
+        children: <Widget>[
+          InkWell(
+            child: ListTile(
+              title: Text("Home"),
+            ),
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (BuildContext context) => HomePage()
+              )
+              );
+            },
+          ),
+          InkWell(
+            child: ListTile(
+              title: Text("Library"),
+            ),
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (BuildContext context) => Library(
+                    musicFiles: allFilePaths,
+                    metadata: allMetaData,
+                  )
+              )
+              );
+            },
+          ),
+          InkWell(
+            child: ListTile(
+              title: Text("Favourites"),
+            ),
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (BuildContext context) => FavouritesPage()
+              )
+              );
+            },
+          ),
+          InkWell(
+            child: ListTile(
+              title: Text("Playlists"),
+            ),
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (BuildContext context) => PlaylistPage(
+                  )
+              )
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
 }

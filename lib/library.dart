@@ -150,48 +150,7 @@ class _LibraryState extends State<Library>{
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
-            drawer: Drawer(
-              child: Column(
-                children: <Widget>[
-                  InkWell(
-                    child: ListTile(
-                      title: Text("Home"),
-                    ),
-                    onTap: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (BuildContext context) => HomePage()
-                      )
-                      );
-                    },
-                  ),
-                  InkWell(
-                    child: ListTile(
-                      title: Text("Library"),
-                    ),
-                    onTap: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (BuildContext context) => Library(
-                            musicFiles: audioplayer.allFilePaths,
-                            metadata: audioplayer.allMetaData,
-                          )
-                      )
-                      );
-                    },
-                  ),
-                  InkWell(
-                    child: ListTile(
-                      title: Text("Favourites"),
-                    ),
-                    onTap: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (BuildContext context) => FavouritesPage()
-                      )
-                      );
-                    },
-                  )
-                ],
-              ),
-            ),
+            drawer: audioplayer.AppDrawer(),
             appBar: AppBar(title: Text("Library")),
             body: Column(
                 children: <Widget>[

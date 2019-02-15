@@ -26,6 +26,7 @@ class PlayingPageState extends State<PlayingPage> {
   StreamSubscription _positionSubscription;
   StreamSubscription _audioPlayerStateSubscription;
   var missingImg = AssetImage("images/noimage.png");
+  final key = GlobalKey<ScaffoldState>();
   @override
   void initState() {
     initAudioPlayer();
@@ -133,51 +134,46 @@ class PlayingPageState extends State<PlayingPage> {
     }
   }
 
+  void addToPlaylist() {
+    List playlistTracks;
+    audioplayer.loadPlaylistData().then((data) {
+      playlistTracks = data;
+      AlertDialog dialog  = AlertDialog(
+          title: Text("Add track to playlist"),
+          content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Expanded(
+                      child: audioplayer.playlistNames != null ?
+                      ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: audioplayer.playlistNames.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return Card(
+                              child: ListTile(
+                                title: Text(audioplayer.playlistNames[index]),
+                                onTap: () {
+                                  audioplayer.savePlaylist(audioplayer.playlistNames[index], playlistTracks[index], [widget.fileMetaData[0]]);
+                                  Navigator.pop(context);
+                                  key.currentState.showSnackBar(SnackBar(content: Text("Track has been added to playlist")));
+                                },
+                              ),
+                            );
+                          }
+                      ) : Text("You haven't created any playlists yet."),
+                  )
+                ],
+              )
+      );
+      showDialog(context: context, builder: (BuildContext context) => dialog);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        drawer: Drawer(
-          child: Column(
-            children: <Widget>[
-              InkWell(
-                child: ListTile(
-                  title: Text("Home"),
-                ),
-                onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (BuildContext context) => HomePage()
-                  )
-                  );
-                },
-              ),
-              InkWell(
-                child: ListTile(
-                  title: Text("Library"),
-                ),
-                onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (BuildContext context) => Library(
-                        musicFiles: audioplayer.allFilePaths,
-                        metadata: audioplayer.allMetaData,
-                      )
-                  )
-                  );
-                },
-              ),
-              InkWell(
-                child: ListTile(
-                  title: Text("Favourites"),
-                ),
-                onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (BuildContext context) => FavouritesPage()
-                  )
-                  );
-                },
-              )
-            ],
-          ),
-        ),
+        key: key,
+        drawer: audioplayer.AppDrawer(),
         backgroundColor: Colors.white,
         appBar: AppBar(
           leading: InkWell(
@@ -210,27 +206,39 @@ class PlayingPageState extends State<PlayingPage> {
             },
           ),
           actions: <Widget>[
-            Padding(
-                padding: EdgeInsets.only(right: 10.0),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(20.0),
-                  child: isFavorited == true ? Icon(Icons.favorite, size: 32.0)
-                      : Icon(Icons.favorite_border, size: 32.0,),
-                  onTap: () {
-                    if (isFavorited == true) {
-                      setState(() {
-                        audioplayer.favList.remove(widget.filePath);
-                        saveFavTrack("", audioplayer.favList);
-                        isFavorited = false;
-                      });
-                    } else {
-                      setState(() {
-                        saveFavTrack(widget.filePath, audioplayer.favList);
-                        isFavorited = true;
-                      });
-                    }
-                  },
-                ))
+            InkWell(
+              customBorder: CircleBorder(),
+              child: Container(
+                width: 50.0,
+                child: Icon(Icons.library_add),
+              ),
+              onTap: () {
+                addToPlaylist();
+              },
+            ),
+            InkWell(
+              customBorder: CircleBorder(),
+              child: Container(
+                width: 50.0,
+                child: isFavorited == true ? Icon(Icons.favorite, size: 32.0)
+                    : Icon(Icons.favorite_border, size: 32.0,),
+
+              ),
+              onTap: () {
+                if (isFavorited == true) {
+                  setState(() {
+                    audioplayer.favList.remove(widget.filePath);
+                    saveFavTrack("", audioplayer.favList);
+                    isFavorited = false;
+                  });
+                } else {
+                  setState(() {
+                    saveFavTrack(widget.filePath, audioplayer.favList);
+                    isFavorited = true;
+                  });
+                }
+              },
+            )
           ],
           toolbarOpacity: 1.0,
           backgroundColor: Colors.white,

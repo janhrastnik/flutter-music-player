@@ -52,6 +52,7 @@ class PlaylistPageState extends State<PlaylistPage> {
               List<String> lst = [];
               savePlaylistNames(_name, lst);
             }
+            Navigator.pop(context);
             Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => ShowPlaylist(
               name: _name,
               tracklist: [],
@@ -64,24 +65,11 @@ class PlaylistPageState extends State<PlaylistPage> {
     showDialog(context: context, builder: (BuildContext context) => dialog);
   }
 
-  Future<List> loadData() async {
-    List playlistTracks = [];
-    if (audioplayer.playlistNames != null) {
-      for (String name in audioplayer.playlistNames) { // we get tracks from all playlists from shared preferences
-        audioplayer.getPlayList(name).then((l) {
-          // print("l is " + l.toString());
-          playlistTracks.add(l);
-        });
-      }
-    }
-    return playlistTracks;
-  }
-
   @override
   void initState() {
     super.initState();
     // print("playlist names are " + audioplayer.playlistNames.toString());
-    loadData();
+    audioplayer.loadPlaylistData();
   }
 
   @override
@@ -94,62 +82,9 @@ class PlaylistPageState extends State<PlaylistPage> {
           },
         ),
         appBar: AppBar(title: Text("Playlists"),),
-        drawer: Drawer(
-          child: Column(
-            children: <Widget>[
-              InkWell(
-                child: ListTile(
-                  title: Text("Home"),
-                ),
-                onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (BuildContext context) => HomePage()
-                  )
-                  );
-                },
-              ),
-              InkWell(
-                child: ListTile(
-                  title: Text("Library"),
-                ),
-                onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (BuildContext context) => Library(
-                        musicFiles: audioplayer.allFilePaths,
-                        metadata: audioplayer.allMetaData,
-                      )
-                  )
-                  );
-                },
-              ),
-              InkWell(
-                child: ListTile(
-                  title: Text("Favourites"),
-                ),
-                onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (BuildContext context) => FavouritesPage()
-                  )
-                  );
-                },
-              ),
-              InkWell(
-                child: ListTile(
-                  title: Text("Playlists"),
-                ),
-                onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (BuildContext context) => PlaylistPage(
-                      )
-                  )
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
+        drawer: audioplayer.AppDrawer(),
         body: FutureBuilder(
-            future: loadData(),
+            future: audioplayer.loadPlaylistData(),
             builder: (BuildContext context, AsyncSnapshot snapshot) {
               if (snapshot.data == null) {
                 return Container(
@@ -158,22 +93,24 @@ class PlaylistPageState extends State<PlaylistPage> {
               } else {
                 return Column(
                   children: <Widget>[
-                    ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: snapshot.data.length,
-                        itemBuilder: (BuildContext context, int index) => ListTile(
-                            title: Text(audioplayer.playlistNames[index]),
-                            trailing: Text(
-                              snapshot.data[index].length.toString() + " Tracks"
-                            ),
-                            onTap: () {
-                              Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => ShowPlaylist(
-                                name: audioplayer.playlistNames[index],
-                                tracklist: snapshot.data[index],
-                              )
-                              ));
-                            }
-                        )
+                    Expanded(
+                      child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: snapshot.data.length,
+                          itemBuilder: (BuildContext context, int index) => ListTile(
+                              title: Text(audioplayer.playlistNames[index]),
+                              trailing: Text(
+                                  snapshot.data[index].length.toString() + " Tracks"
+                              ),
+                              onTap: () {
+                                Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => ShowPlaylist(
+                                  name: audioplayer.playlistNames[index],
+                                  tracklist: snapshot.data[index],
+                                )
+                                ));
+                              }
+                          )
+                      ),
                     )
                   ],
                 );
@@ -309,6 +246,8 @@ class TrackSelectionState extends State<TrackSelection> {
               child: Icon(Icons.check),
               onTap: () {
                 audioplayer.savePlaylist(widget.name, [], checkedTracks);
+                Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext) => PlaylistPage()
+                ));
               },
             ),
           )
@@ -322,8 +261,8 @@ class TrackSelectionState extends State<TrackSelection> {
             title: Text(audioplayer.allMetaData[index][0]),
             subtitle: Text(audioplayer.allMetaData[index][1]),
             trailing:
-              checkedTracks.contains(audioplayer.allMetaData[index][0]) == true ? Icon(Icons.check_box)
-                  : Icon(Icons.check_box_outline_blank),
+            checkedTracks.contains(audioplayer.allMetaData[index][0]) == true ? Icon(Icons.check_box)
+                : Icon(Icons.check_box_outline_blank),
             onTap: () {
               setState(() {
                 if (checkedTracks.contains(audioplayer.allMetaData[index][0]) == true) {
@@ -333,7 +272,7 @@ class TrackSelectionState extends State<TrackSelection> {
                 }
               });
             },
-            )
+          )
             ),
           );
   }
