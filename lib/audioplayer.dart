@@ -19,7 +19,7 @@ List allFilePaths;
 List<String> favList = [];
 
 // all playlist names
-List<String> playlistNames = [];
+List<String> playlistNames;
 
 enum PlayerState { stopped, playing, paused }
 AudioPlayer audioPlayer;

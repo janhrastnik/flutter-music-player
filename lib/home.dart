@@ -47,7 +47,7 @@ class HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-  scrollQueue() {
+  scrollQueue() { // scrolls to current track
     try {
       _scrollController.jumpTo(audioplayer.currTrack * 108.0);
     } catch(e) {
@@ -72,48 +72,7 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: Drawer(
-        child: Column(
-          children: <Widget>[
-            InkWell(
-              child: ListTile(
-                title: Text("Home"),
-              ),
-              onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (BuildContext context) => HomePage()
-                )
-                );
-              },
-            ),
-            InkWell(
-              child: ListTile(
-                title: Text("Library"),
-              ),
-              onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (BuildContext context) => Library(
-                      musicFiles: audioplayer.allFilePaths,
-                      metadata: audioplayer.allMetaData,
-                    )
-                )
-                );
-              },
-            ),
-            InkWell(
-              child: ListTile(
-                title: Text("Favourites"),
-              ),
-              onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (BuildContext context) => FavouritesPage()
-                )
-                );
-              },
-            )
-          ],
-        ),
-      ),
+      drawer: audioplayer.AppDrawer(),
         body: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             mainAxisSize: MainAxisSize.max,
@@ -206,7 +165,8 @@ class HomePageState extends State<HomePage> {
                         child: InkWell(
                           child: Center(child: Text("Playlists"),),
                           onTap: () {
-                            Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => PlaylistPage(),));
+                            Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => PlaylistPage(
+                            ),));
                           },
                         ),
                       ),

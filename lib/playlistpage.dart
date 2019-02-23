@@ -15,53 +15,61 @@ class PlaylistPage extends StatefulWidget {
 class PlaylistPageState extends State<PlaylistPage> {
   String _name;
   final TextEditingController controller = TextEditingController();
+  int counter = 0;
+  int playlistLength = 0;
 
   void savePlaylistNames(String name, playlistNames) async {
-    playlistNames.add(name);
+    if (name != null) {
+      playlistNames.add(name);
+    }
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setStringList("playlistNames", playlistNames);
   }
 
   void createPlaylist() {
-    AlertDialog dialog  = AlertDialog(
-      title: Text("test"),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-        TextField(
-          decoration: InputDecoration(
-              labelText: 'Playlist name'
-          ),
-          onChanged: (input) {
-            setState(() {
-              _name = input;
-            });
-          },
-          controller: controller,
-        ),
-        FlatButton(
-          child: Text("Create playlist"),
-          onPressed: () {
-            setState(() {
-              controller.text = "";
-            });
-            audioplayer.savePlaylist(_name, [], null); // saves playlist to shared preferences
-            if (audioplayer.playlistNames != null) {
-              savePlaylistNames(_name, audioplayer.playlistNames);
-            } else {
-              List<String> lst = [];
-              savePlaylistNames(_name, lst);
-            }
-            Navigator.pop(context);
-            Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => ShowPlaylist(
-              name: _name,
-              tracklist: [],
+    AlertDialog dialog = AlertDialog(
+        title: Text("test"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            TextField(
+              decoration: InputDecoration(labelText: 'Playlist name'),
+              onChanged: (input) {
+                setState(() {
+                  _name = input;
+                });
+              },
+              controller: controller,
+            ),
+            FlatButton(
+              child: Text("Create playlist"),
+              onPressed: () {
+                if (_name != null) {
+                  setState(() {
+                    controller.text = "";
+                  });
+                  audioplayer.savePlaylist(
+                      _name, [], null); // saves playlist to shared preferences
+                  if (audioplayer.playlistNames != null) {
+                    savePlaylistNames(_name, audioplayer.playlistNames);
+                  } else {
+                    List<String> lst = [];
+                    savePlaylistNames(_name, lst);
+                  }
+                  audioplayer.getPlayListNames().then((l) {
+                    audioplayer.playlistNames = l;
+                  });
+                  Navigator.of(context, rootNavigator: true).pop('dialog');
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (BuildContext context) => ShowPlaylist(
+                            name: _name,
+                            tracklist: [],
+                          )));
+                }
+              },
             )
-            ));
-          },
-        )
-      ],)
-    );
+          ],
+        ));
     showDialog(context: context, builder: (BuildContext context) => dialog);
   }
 
@@ -70,55 +78,84 @@ class PlaylistPageState extends State<PlaylistPage> {
     super.initState();
     // print("playlist names are " + audioplayer.playlistNames.toString());
     audioplayer.loadPlaylistData();
+    print(audioplayer.playlistNames);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         floatingActionButton: FloatingActionButton(
-          child: Center(child: Text("+", style: TextStyle(fontSize: 40.0, fontWeight: FontWeight.w300),),),
+          child: Center(
+            child: Text(
+              "+",
+              style: TextStyle(fontSize: 40.0, fontWeight: FontWeight.w300),
+            ),
+          ),
           onPressed: () {
             createPlaylist();
           },
         ),
-        appBar: AppBar(title: Text("Playlists"),),
+        appBar: AppBar(
+          title: Text("Playlists"),
+        ),
         drawer: audioplayer.AppDrawer(),
-        body: FutureBuilder(
-            future: audioplayer.loadPlaylistData(),
-            builder: (BuildContext context, AsyncSnapshot snapshot) {
-              if (snapshot.data == null) {
+        body: audioplayer.playlistNames != null ? FutureBuilder(
+          future: audioplayer.loadPlaylistData(),
+          builder: (BuildContext context, AsyncSnapshot snapshot) {
+            try {
+              var data = Map();
+              List tempData = snapshot.data;
+              if (tempData == null) {
                 return Container(
                   child: Text("Loading..."),
                 );
               } else {
+                for (var i in List<int>.generate(
+                    tempData.length, (n) => n + 1)) {
+                  data[audioplayer.playlistNames[i - 1]] =
+                      tempData[i - 1];
+                }
                 return Column(
                   children: <Widget>[
                     Expanded(
                       child: ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: snapshot.data.length,
-                          itemBuilder: (BuildContext context, int index) => ListTile(
-                              title: Text(audioplayer.playlistNames[index]),
-                              trailing: Text(
-                                  snapshot.data[index].length.toString() + " Tracks"
-                              ),
+                        shrinkWrap: true,
+                        itemCount: data.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          final playlistName =
+                              audioplayer.playlistNames[index];
+                          return Dismissible(
+                            key: Key(audioplayer.playlistNames[index]),
+                            onDismissed: (direction) {
+                              audioplayer.playlistNames.remove(playlistName);
+                              savePlaylistNames(null, audioplayer.playlistNames);
+                              data.remove(playlistName);
+                              print(audioplayer.playlistNames);
+                            },
+                            child: ListTile(
+                              title: Text(playlistName),
+                              trailing: Text(data[playlistName].length.toString() +" Tracks"),
                               onTap: () {
-                                Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => ShowPlaylist(
-                                  name: audioplayer.playlistNames[index],
-                                  tracklist: snapshot.data[index],
-                                )
-                                ));
-                              }
-                          )
-                      ),
+                                Navigator.of(context).push(
+                                    MaterialPageRoute(builder: (BuildContext context) =>
+                                            ShowPlaylist(
+                                              name: playlistName,
+                                              tracklist: data[playlistName],
+                                            )));
+                              }));
+                          }),
                     )
                   ],
                 );
               }
+            } catch (e) {
+              return Text("loading...");
             }
-        )
-      );
-    }
+          })
+        : Center(
+            child: Text("You haven't added any playlists yet."),
+          ));
+  }
 }
 
 class ShowPlaylist extends StatefulWidget {
@@ -136,9 +173,12 @@ class ShowPlaylistState extends State<ShowPlaylist> {
 
   getImage(i) {
     if (playlistMetaData[i][2] != "") {
-      return Image.memory(playlistMetaData[i][2], width: MediaQuery.of(context).size.width/7,);
+      return Image.memory(
+        playlistMetaData[i][2],
+        width: MediaQuery.of(context).size.width / 7,
+      );
     } else {
-      return Image.asset(img, width: MediaQuery.of(context).size.width/7);
+      return Image.asset(img, width: MediaQuery.of(context).size.width / 7);
     }
   }
 
@@ -153,65 +193,90 @@ class ShowPlaylistState extends State<ShowPlaylist> {
           i = audioplayer.allMetaData.indexOf(x);
           path = audioplayer.allFilePaths[i];
           playlistFilePaths.add(path);
-          playlistMetaData.add([audioplayer.allMetaData[i][0], audioplayer.allMetaData[i][1], audioplayer.allMetaData[i][2]]);
+          playlistMetaData.add([
+            audioplayer.allMetaData[i][0],
+            audioplayer.allMetaData[i][1],
+            audioplayer.allMetaData[i][2]
+          ]);
         }
       }
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: widget.name != null ? Text(widget.name) : Text("aaa"),),
-      body: widget.tracklist.length == 0 ?
-      Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Text("This playlist is currently empty. Start adding some tracks!"),
-          RaisedButton(
-              child: Text("Add Tracks"),
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (BuildContext context) => TrackSelection(
-                      name: widget.name,
-                    )
-                ));
-              }
-          )
-        ],
-      ) :
-      ListView.builder(
-          itemCount: playlistMetaData.length,
-          itemBuilder: (BuildContext context, int index) {
-            return ListTile(
-              leading: getImage(index),
-              title: Text(playlistMetaData[index][0]),
-              subtitle: Text(playlistMetaData[index][1]),
-              trailing: Text((index+1).toString()),
-              onTap: () {
-                // TRACK GETS PLAYED, PLAYLIST FILEPATHS AND METADATA GET ADDED TO PLAYQUEUE
-                // YOU NEED PLAYLIST METADATA
-                print("FILEPATHS ARE " + playlistFilePaths.toString());
-                audioplayer.fileList = playlistFilePaths;
-                audioplayer.metaData = playlistMetaData;
-                audioplayer.currTrack = index;
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                      builder: (BuildContext context) => PlayingPage(
-                          filePath: playlistFilePaths[index],
-                          image: playlistMetaData[index][2],
-                          fileMetaData: playlistMetaData[index][0] != null ?
-                          playlistMetaData[index] :
-                          [playlistMetaData[index][0], "unknown"],
-                          backPage: "playlistPage"
-                      )
-                  )
-                );
-              },
-            );
-          }
-      )
-    );
+        appBar: AppBar(
+          title: widget.name != null ? Text(widget.name) : Text("aaa"),
+        ),
+        body: widget.tracklist.length == 0
+            ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                      "This playlist is currently empty. Start adding some tracks!"),
+                  RaisedButton(
+                      child: Text("Add Tracks"),
+                      onPressed: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (BuildContext context) => TrackSelection(
+                                  name: widget.name,
+                                )));
+                      })
+                ],
+              )
+            : ListView.builder(
+                itemCount: playlistMetaData.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return Dismissible(
+                      key: Key(playlistMetaData[index][0]),
+                      background: Container(
+                        padding: EdgeInsets.only(left: 10.0),
+                        color: Colors.red,
+                        alignment: Alignment.centerLeft,
+                        child: Icon(Icons.delete),
+                      ),
+                      secondaryBackground: Container(
+                        padding: EdgeInsets.only(right: 10.0),
+                        color: Colors.red,
+                        alignment: Alignment.centerRight,
+                        child: Icon(Icons.delete),
+                      ),
+                      onDismissed: (direction) {
+                        setState(() {
+                          playlistMetaData.removeAt(index);
+                          widget.tracklist.removeAt(index);
+                          audioplayer.savePlaylist(
+                              widget.name, widget.tracklist, null);
+                          Scaffold.of(context).showSnackBar(
+                              SnackBar(content: Text("Track removed.")));
+                        });
+                      },
+                      child: ListTile(
+                        leading: getImage(index),
+                        title: Text(playlistMetaData[index][0]),
+                        subtitle: Text(playlistMetaData[index][1]),
+                        trailing: Text((index + 1).toString()),
+                        onTap: () {
+                          // TRACK GETS PLAYED, PLAYLIST FILEPATHS AND METADATA GET ADDED TO PLAYQUEUE
+                          // YOU NEED PLAYLIST METADATA
+                          print(
+                              "FILEPATHS ARE " + playlistFilePaths.toString());
+                          audioplayer.fileList = playlistFilePaths;
+                          audioplayer.metaData = playlistMetaData;
+                          audioplayer.currTrack = index;
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (BuildContext context) => PlayingPage(
+                                  filePath: playlistFilePaths[index],
+                                  image: playlistMetaData[index][2],
+                                  fileMetaData: playlistMetaData[index][0] !=
+                                          null
+                                      ? playlistMetaData[index]
+                                      : [playlistMetaData[index][0], "unknown"],
+                                  backPage: "playlistPage")));
+                        },
+                      ));
+                }));
   }
 }
 
@@ -228,9 +293,12 @@ class TrackSelectionState extends State<TrackSelection> {
 
   getImage(i) {
     if (audioplayer.allMetaData[i][2] != "") {
-      return Image.memory(audioplayer.allMetaData[i][2], width: MediaQuery.of(context).size.width/7,);
+      return Image.memory(
+        audioplayer.allMetaData[i][2],
+        width: MediaQuery.of(context).size.width / 7,
+      );
     } else {
-      return Image.asset(img, width: MediaQuery.of(context).size.width/7);
+      return Image.asset(img, width: MediaQuery.of(context).size.width / 7);
     }
   }
 
@@ -246,8 +314,8 @@ class TrackSelectionState extends State<TrackSelection> {
               child: Icon(Icons.check),
               onTap: () {
                 audioplayer.savePlaylist(widget.name, [], checkedTracks);
-                Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext) => PlaylistPage()
-                ));
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (BuildContext) => PlaylistPage()));
               },
             ),
           )
@@ -257,24 +325,27 @@ class TrackSelectionState extends State<TrackSelection> {
           shrinkWrap: true,
           itemCount: audioplayer.allFilePaths.length,
           itemBuilder: (BuildContext context, int index) => ListTile(
-            leading: getImage(index),
-            title: Text(audioplayer.allMetaData[index][0]),
-            subtitle: Text(audioplayer.allMetaData[index][1]),
-            trailing:
-            checkedTracks.contains(audioplayer.allMetaData[index][0]) == true ? Icon(Icons.check_box)
-                : Icon(Icons.check_box_outline_blank),
-            onTap: () {
-              setState(() {
-                if (checkedTracks.contains(audioplayer.allMetaData[index][0]) == true) {
-                  checkedTracks.remove(audioplayer.allMetaData[index][0]);
-                } else {
-                  checkedTracks.add(audioplayer.allMetaData[index][0]);
-                }
-              });
-            },
-          )
-            ),
-          );
+                leading: getImage(index),
+                title: Text(audioplayer.allMetaData[index][0]),
+                subtitle: Text(audioplayer.allMetaData[index][1]),
+                trailing:
+                    checkedTracks.contains(audioplayer.allMetaData[index][0]) ==
+                            true
+                        ? Icon(Icons.check_box)
+                        : Icon(Icons.check_box_outline_blank),
+                onTap: () {
+                  setState(() {
+                    if (checkedTracks
+                            .contains(audioplayer.allMetaData[index][0]) ==
+                        true) {
+                      checkedTracks.remove(audioplayer.allMetaData[index][0]);
+                    } else {
+                      checkedTracks.add(audioplayer.allMetaData[index][0]);
+                    }
+                  });
+                },
+              )),
+    );
   }
 }
 
