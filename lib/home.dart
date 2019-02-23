@@ -79,10 +79,15 @@ class HomePageState extends State<HomePage> {
             children: <Widget>[
                 Padding(
                   padding: EdgeInsets.only(top: 30.0),
-                  child: RichText(text: TextSpan(style: TextStyle(color: Colors.black), children: <TextSpan>[
-                      TextSpan(text: "Your Queue \n", style: TextStyle(fontSize: 22.0, height: 0.4)),
-                      TextSpan(text: "_________________", style: TextStyle(fontSize: 22.0, height: 0.4, color: Color.fromRGBO(200, 200, 200, 1.0))),
-                  ]), textAlign: TextAlign.center,),
+                  child: Column(
+                    children: <Widget>[
+                      Text("Your queue", style: TextStyle(fontSize: 22.0),),
+                      Container(
+                        padding: EdgeInsets.only(left: 70.0, right: 70.0),
+                        child: Divider(color: Colors.black54,),
+                      )
+                    ],
+                  )
                 ),
                 Expanded(
                   child: audioplayer.metaData != null ? ListView.builder( // play queue

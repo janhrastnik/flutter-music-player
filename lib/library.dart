@@ -96,17 +96,29 @@ class _LibraryState extends State<Library>{
                       ),
                     ),
                     Expanded(
-                      child: Text("${
-                          widget.metadata[audioplayer.currTrack][0] != null
-                              ? widget.metadata[audioplayer.currTrack][0]
-                              : widget.musicFiles[audioplayer.currTrack]
-                      } by ${
-                          widget.metadata[audioplayer.currTrack][1] != null
-                              ? widget.metadata[audioplayer.currTrack][1]
-                              : "unknown"
-                      }",
-                        style: TextStyle(
-                            fontSize: 12.0
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (BuildContext context) => PlayingPage(
+                                filePath: widget.musicFiles[audioplayer.currTrack],
+                                fileMetaData: widget.metadata[audioplayer.currTrack],
+                                image: widget.metadata[audioplayer.currTrack][2],
+                                backPage: "libraryPage",
+                              )
+                          ));
+                        },
+                        child: Text("${
+                            widget.metadata[audioplayer.currTrack][0] != null
+                                ? widget.metadata[audioplayer.currTrack][0]
+                                : widget.musicFiles[audioplayer.currTrack]
+                        } by ${
+                            widget.metadata[audioplayer.currTrack][1] != null
+                                ? widget.metadata[audioplayer.currTrack][1]
+                                : "unknown"
+                        }",
+                          style: TextStyle(
+                              fontSize: 12.0
+                          ),
                         ),
                       ),
                     ),

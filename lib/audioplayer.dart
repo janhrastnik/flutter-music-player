@@ -10,6 +10,7 @@ import 'library.dart';
 // for playlists
 List fileList;
 int currTrack;
+String currTrackName;
 List metaData;
 // data of all tracks on device
 List allMetaData;

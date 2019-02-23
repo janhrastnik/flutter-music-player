@@ -31,10 +31,14 @@ class PlayingPageState extends State<PlayingPage> {
   void initState() {
     initAudioPlayer();
     super.initState();
-    audioplayer.duration = new Duration(seconds: 0);
-    audioplayer.position = new Duration(seconds: 0);
-    audioplayer.stop();
-    audioplayer.play(widget.filePath);
+    if (audioplayer.currTrackName != widget.filePath) {
+      audioplayer.duration = new Duration(seconds: 0);
+      audioplayer.position = new Duration(seconds: 0);
+      audioplayer.stop();
+      audioplayer.play(widget.filePath);
+    } else {
+      audioplayer.play(widget.filePath);
+    }
     audioplayer.playerState = audioplayer.PlayerState.playing;
     audioplayer.getFavTrackList().then((l) {
       if (audioplayer.favList != null) {
@@ -50,6 +54,7 @@ class PlayingPageState extends State<PlayingPage> {
     audioplayer.getFavTrackList().then((l) {
       audioplayer.favList = l;
     });
+    audioplayer.currTrackName = widget.filePath;
   }
 
   void initAudioPlayer() {
