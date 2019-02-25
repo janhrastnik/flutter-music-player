@@ -6,12 +6,13 @@ import 'home.dart';
 import 'playlistpage.dart';
 import 'favourites.dart';
 import 'library.dart';
+import 'package:random_color/random_color.dart';
 
-// for playlists
-List fileList;
+// for playlists, play queue
+List queueFileList;
 int currTrack;
 String currTrackName;
-List metaData;
+List queueMetaData;
 // data of all tracks on device
 List allMetaData;
 List allFilePaths;
@@ -21,6 +22,8 @@ List<String> favList = [];
 
 // all playlist names
 List<String> playlistNames;
+
+RandomColor randomColor = RandomColor();
 
 enum PlayerState { stopped, playing, paused }
 AudioPlayer audioPlayer;

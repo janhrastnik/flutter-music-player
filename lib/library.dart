@@ -24,29 +24,6 @@ class _LibraryState extends State<Library>{
   StreamSubscription _audioPlayerStateSubscription;
   static const platform = const MethodChannel('demo.janhrastnik.com/info');
 
-  void initAudioPlayer() {
-    audioplayer.audioPlayer = new AudioPlayer();
-    _positionSubscription = audioplayer.audioPlayer.onAudioPositionChanged
-        .listen((p) => setState(() => audioplayer.position = p));
-    _audioPlayerStateSubscription =
-        audioplayer.audioPlayer.onPlayerStateChanged.listen((s) {
-          if (s == AudioPlayerState.PLAYING) {
-            setState(() =>
-            audioplayer.duration = audioplayer.audioPlayer.duration);
-          } else if (s == AudioPlayerState.STOPPED) {
-            setState(() {
-              audioplayer.position = audioplayer.duration;
-            });
-          }
-        }, onError: (msg) {
-          setState(() {
-            // audioplayer.playerState = PlayerState.stopped;
-            audioplayer.duration = new Duration(seconds: 0);
-            audioplayer.position = new Duration(seconds: 0);
-          });
-        });
-  }
-
   void onComplete() {
     // setState(() => audioplayer.playerState = PlayerState.stopped);
   }
@@ -62,7 +39,6 @@ class _LibraryState extends State<Library>{
   @override
   void initState() {
     super.initState();
-    initAudioPlayer();
     print("in library, playerstate is ${audioplayer.playerState.toString()}");
   }
 
@@ -102,7 +78,6 @@ class _LibraryState extends State<Library>{
                               builder: (BuildContext context) => PlayingPage(
                                 filePath: widget.musicFiles[audioplayer.currTrack],
                                 fileMetaData: widget.metadata[audioplayer.currTrack],
-                                image: widget.metadata[audioplayer.currTrack][2],
                                 backPage: "libraryPage",
                               )
                           ));
@@ -175,14 +150,13 @@ class _LibraryState extends State<Library>{
                               title: Text(widget.metadata[index][0]),
                               subtitle: Text(widget.metadata[index][1]),
                               onTap: () {
-                                audioplayer.fileList = widget.musicFiles;
+                                audioplayer.queueFileList = widget.musicFiles;
                                 audioplayer.currTrack = index;
-                                audioplayer.metaData = widget.metadata;
+                                audioplayer.queueMetaData = widget.metadata;
                                 Navigator.of(context).push(
                                     MaterialPageRoute(
                                         builder: (BuildContext context) => new PlayingPage(
                                           filePath: widget.musicFiles[index],
-                                          image: widget.metadata[index][2],
                                           fileMetaData: widget.metadata[index][0] != null ?
                                           widget.metadata[index] :
                                           [widget.musicFiles[index], "unknown"],

@@ -24,6 +24,7 @@ dependencies:
   audioplayer: ^0.5.2
   mp3_meta_data: ^0.0.1
   shared_preferences: ^0.4.3
+  random_color: ^1.0.3
 
 dev_dependencies:
   flutter_test:

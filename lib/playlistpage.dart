@@ -262,13 +262,12 @@ class ShowPlaylistState extends State<ShowPlaylist> {
                           // YOU NEED PLAYLIST METADATA
                           print(
                               "FILEPATHS ARE " + playlistFilePaths.toString());
-                          audioplayer.fileList = playlistFilePaths;
-                          audioplayer.metaData = playlistMetaData;
+                          audioplayer.queueFileList = playlistFilePaths;
+                          audioplayer.queueMetaData = playlistMetaData;
                           audioplayer.currTrack = index;
                           Navigator.of(context).push(MaterialPageRoute(
                               builder: (BuildContext context) => PlayingPage(
                                   filePath: playlistFilePaths[index],
-                                  image: playlistMetaData[index][2],
                                   fileMetaData: playlistMetaData[index][0] !=
                                           null
                                       ? playlistMetaData[index]

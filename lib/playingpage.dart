@@ -7,21 +7,21 @@ import 'favourites.dart';
 import 'home.dart';
 import 'package:audioplayer/audioplayer.dart';
 import 'playlistpage.dart';
+import 'package:random_color/random_color.dart';
 
 class PlayingPage extends StatefulWidget {
-  // TODO: REMOVE IMAGE, ITS ALREADY IN FILEMETADATA
   var filePath;
-  var image;
   var fileMetaData;
   var backPage;
 
-  PlayingPage({Key key, @required this.filePath, this.image, this.fileMetaData, @required this.backPage}) : super(key: key);
+  PlayingPage({Key key, @required this.filePath, this.fileMetaData, @required this.backPage}) : super(key: key);
 
   PlayingPageState createState() => PlayingPageState();
 }
 
 class PlayingPageState extends State<PlayingPage> {
   String img = "images/noimage.png";
+  Color pageColor = audioplayer.randomColor.randomColor(colorBrightness: ColorBrightness.custom(Range(80, 83)));
   bool isFavorited;
   StreamSubscription _positionSubscription;
   StreamSubscription _audioPlayerStateSubscription;
@@ -136,7 +136,7 @@ class PlayingPageState extends State<PlayingPage> {
 
   getImage() {
     try {
-      return Image.memory(widget.image);
+      return Image.memory(widget.fileMetaData[2]);
     } catch(e) {
       return Image(image: missingImg,);
     }
@@ -258,7 +258,7 @@ class PlayingPageState extends State<PlayingPage> {
         body: Material(
           shadowColor: Colors.black54,
           elevation: 20.0,
-          color: Color(0xFFe6e6fa),
+          color: pageColor,
           child: Column(
             children: <Widget>[
               Container(
@@ -296,10 +296,9 @@ class PlayingPageState extends State<PlayingPage> {
                                 audioplayer.currTrack--;
                                 Navigator.of(context).push(MaterialPageRoute(
                                     builder: (BuildContext context) => PlayingPage(
-                                      filePath: audioplayer.fileList[audioplayer.currTrack],
-                                      image: audioplayer.metaData[audioplayer.currTrack][2],
-                                      fileMetaData: audioplayer.metaData[audioplayer.currTrack][0] != null
-                                          ? audioplayer.metaData[audioplayer.currTrack] : [audioplayer.fileList[audioplayer.currTrack], "unknown"],
+                                      filePath: audioplayer.queueFileList[audioplayer.currTrack],
+                                      fileMetaData: audioplayer.queueMetaData[audioplayer.currTrack][0] != null
+                                          ? audioplayer.queueMetaData[audioplayer.currTrack] : [audioplayer.queueFileList[audioplayer.currTrack], "unknown"],
                                       backPage: widget.backPage,
                                     )
                                 )
@@ -327,14 +326,13 @@ class PlayingPageState extends State<PlayingPage> {
                           child: InkWell(
                             child: Icon(Icons.skip_next, size: 30.0, color: Colors.blueGrey,),
                             onTap: () {
-                              if (audioplayer.currTrack != audioplayer.fileList.length-1) {
+                              if (audioplayer.currTrack != audioplayer.queueFileList.length-1) {
                                 audioplayer.currTrack++;
                                 Navigator.of(context).push(MaterialPageRoute(
                                     builder: (BuildContext context) => PlayingPage(
-                                      filePath: audioplayer.fileList[audioplayer.currTrack],
-                                      image: audioplayer.metaData[audioplayer.currTrack][2],
-                                      fileMetaData: audioplayer.metaData[audioplayer.currTrack][0] != null
-                                          ? audioplayer.metaData[audioplayer.currTrack] : [audioplayer.fileList[audioplayer.currTrack], "unknown"],
+                                      filePath: audioplayer.queueFileList[audioplayer.currTrack],
+                                      fileMetaData: audioplayer.queueMetaData[audioplayer.currTrack][0] != null
+                                          ? audioplayer.queueMetaData[audioplayer.currTrack] : [audioplayer.queueFileList[audioplayer.currTrack], "unknown"],
                                       backPage: widget.backPage,
                                     )
                                 )

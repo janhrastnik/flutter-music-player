@@ -40,14 +40,7 @@ class FavouritesPageState extends State<FavouritesPage>{
       drawer: audioplayer.AppDrawer(),
       appBar: AppBar(
         title: Text("Favourites"),
-        leading: InkWell(
-          child: Icon(Icons.arrow_back),
-            onTap: () {
-            Navigator.of(context).push(MaterialPageRoute(
-            builder: (BuildContext context) =>
-              HomePage()
-            ));}
-      )),
+        ),
       body: audioplayer.favList != null ?
       ListView.builder(
       itemCount: audioplayer.favList.length,
@@ -58,14 +51,13 @@ class FavouritesPageState extends State<FavouritesPage>{
           title: Text(track_metadata[0]),
           subtitle: Text(track_metadata[1]),
           onTap: () {
-            audioplayer.fileList = audioplayer.favList;
-            audioplayer.metaData = favListMetaData;
+            audioplayer.queueFileList = audioplayer.favList;
+            audioplayer.queueMetaData = favListMetaData;
             audioplayer.currTrack = index;
             Navigator.of(context).push(
                 MaterialPageRoute(
                     builder: (BuildContext context) => new PlayingPage(
                       filePath: audioplayer.favList[index],
-                      image: track_metadata[2],
                       fileMetaData: track_metadata[0] != null ?
                       track_metadata :
                       [audioplayer.favList[index], "unknown"] ,

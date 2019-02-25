@@ -6,6 +6,7 @@ import 'package:audioplayer/audioplayer.dart';
 import 'favourites.dart';
 import 'playingpage.dart';
 import 'playlistpage.dart';
+import 'artistpage.dart';
 
 class HomePage extends StatefulWidget {
   HomePageState createState() => HomePageState();
@@ -90,8 +91,8 @@ class HomePageState extends State<HomePage> {
                   )
                 ),
                 Expanded(
-                  child: audioplayer.metaData != null ? ListView.builder( // play queue
-                    itemCount: audioplayer.metaData.length,
+                  child: audioplayer.queueMetaData != null ? ListView.builder( // play queue
+                    itemCount: audioplayer.queueMetaData.length,
                     controller: _scrollController,
                     scrollDirection: Axis.horizontal,
                     itemBuilder: (BuildContext context, int index) {
@@ -103,13 +104,13 @@ class HomePageState extends State<HomePage> {
                             child: InkWell(
                               child: Column(
                                 children: <Widget>[
-                                  audioplayer.metaData[index][2] != "" ? Padding(padding: EdgeInsets.all(8.0), child: Image.memory(audioplayer.metaData[index][2], width: 75.0,))
+                                  audioplayer.queueMetaData[index][2] != "" ? Padding(padding: EdgeInsets.all(8.0), child: Image.memory(audioplayer.queueMetaData[index][2], width: 75.0,))
                                      : Container(),
                                   Container(
                                     padding: EdgeInsets.only(left: 5.0, right: 5.0),
                                     width: 100.0,
                                     child: Center(child: Text(
-                                      audioplayer.metaData[index][0],
+                                      audioplayer.queueMetaData[index][0],
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                     )),
@@ -121,11 +122,10 @@ class HomePageState extends State<HomePage> {
                                 Navigator.of(context).push(
                                     MaterialPageRoute(
                                         builder: (BuildContext context) => new PlayingPage(
-                                          filePath: audioplayer.fileList[index],
-                                          image: audioplayer.metaData[index][2],
-                                          fileMetaData: audioplayer.metaData[index][0] != null ?
-                                          audioplayer.metaData[index] :
-                                          [audioplayer.metaData[index], "unknown"],
+                                          filePath: audioplayer.queueFileList[index],
+                                          fileMetaData: audioplayer.queueMetaData[index][0] != null ?
+                                          audioplayer.queueMetaData[index] :
+                                          [audioplayer.queueMetaData[index], "unknown"],
                                           backPage: "homePage",
                                         )
                                     )
@@ -140,46 +140,96 @@ class HomePageState extends State<HomePage> {
                       fontStyle: FontStyle.italic, color: Colors.grey),),
                   )
                 ),
-                GridView.count(
-                  shrinkWrap: true,
+                Container(
+                  decoration: BoxDecoration(
+                      boxShadow: [BoxShadow(
+                          offset: Offset(5.0, 5.0),
+                          spreadRadius: 5.0,
+                          blurRadius: 15.0,
+                          color: Colors.grey
+                      )]
+                  ),
+                  child: GridView.count(
+                    shrinkWrap: true,
                     crossAxisCount: 2,
                     children: <Widget>[
-                      Material(
-                        color: Colors.deepOrangeAccent,
-                        child: InkWell(
-                          child: Center(child: Text("Library"),),
-                          onTap: () {
-                            Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => Library(
-                              musicFiles: audioplayer.allFilePaths,
-                              metadata: audioplayer.allMetaData,
-                            ),));
-                          },
+                      Padding(
+                        padding: EdgeInsets.only(right: 1.0, bottom: 1.0),
+                        child: Material(
+                          child: InkWell(
+                            child: Center(child: Column(
+                              children: <Widget>[
+                                Icon(Icons.library_music),
+                                Text("Library")
+                              ],
+                              mainAxisSize: MainAxisSize.min,
+                            ),),
+                            onTap: () {
+                              Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => Library(
+                                musicFiles: audioplayer.allFilePaths,
+                                metadata: audioplayer.allMetaData,
+                              ),));
+                            },
+                          ),
                         ),
                       ),
-                      Material(
-                        color: Colors.cyanAccent,
-                        child: InkWell(
-                          child: Center(child: Text("Favourites"),),
-                          onTap: () {
-                            Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => FavouritesPage(),));
-                          },
+                      Padding(
+                        padding: EdgeInsets.only(left: 1.0, bottom: 1.0),
+                        child: Material(
+                          child: InkWell(
+                            child: Center(child: Column(
+                              children: <Widget>[
+                                Icon(Icons.favorite_border),
+                                Text("Favourites")
+                              ],
+                              mainAxisSize: MainAxisSize.min,
+                            ),),
+                            onTap: () {
+                              Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => FavouritesPage(),));
+                            },
+                          ),
                         ),
                       ),
-                      Material(
-                        color: Colors.greenAccent,
-                        child: InkWell(
-                          child: Center(child: Text("Playlists"),),
-                          onTap: () {
-                            Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => PlaylistPage(
-                            ),));
-                          },
+                      Padding(
+                        padding: EdgeInsets.only(top: 1.0, right: 1.0),
+                        child: Material(
+                          child: InkWell(
+                            child: Center(child: Column(
+                              children: <Widget>[
+                                Icon(Icons.list),
+                                Text("Playlists")
+                              ],
+                              mainAxisSize: MainAxisSize.min,
+                            ),),
+                            onTap: () {
+                              Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => PlaylistPage(
+                              ),));
+                            },
+                          ),
                         ),
                       ),
-                      Container(
-                        color: Colors.amberAccent,
+                      Padding(
+                        padding: EdgeInsets.only(left: 1.0, top: 1.0),
+                        child: Material(
+                          child: InkWell(
+                            child: Center(child: Column(
+                              children: <Widget>[
+                                Icon(Icons.account_circle),
+                                Text("Artists")
+                              ],
+                              mainAxisSize: MainAxisSize.min,
+                            ),),
+                            onTap: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (BuildContext context) => ArtistPage()
+                              ));
+                            },
+                          ),
+                        ),
                       )
                     ],
                   ),
+                ),
             ],
                   ),
                 );
