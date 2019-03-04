@@ -245,8 +245,6 @@ class ShowPlaylistState extends State<ShowPlaylist> {
                         trailing: Text((index + 1).toString()),
                         onTap: () {
                           // TRACK GETS PLAYED, PLAYLIST FILEPATHS AND METADATA GET ADDED TO PLAYQUEUE
-                          print(
-                              "FILEPATHS ARE " + playlistFilePaths.toString());
                           audioplayer.queueFileList = playlistFilePaths;
                           audioplayer.queueMetaData = playlistMetaData;
                           audioplayer.currTrack = index;
@@ -332,27 +330,3 @@ class TrackSelectionState extends State<TrackSelection> {
     );
   }
 }
-
-/*
-Column(
-          children: <Widget>[
-            ListView.builder(
-                shrinkWrap: true,
-                itemCount: playlistTracks.length,
-                itemBuilder: (BuildContext context, int index) => ListTile(
-                    title: Text(audioplayer.playlistNames[index]),
-                    trailing: Text(
-                        playlistTracks[index].length.toString() + " Tracks"
-                    ),
-                    onTap: () {
-                      Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => ShowPlaylist(
-                        name: audioplayer.playlistNames[index],
-                        tracklist: playlistTracks[index],
-                      )
-                      ));
-                    }
-                )
-            )
-          ],
-        ),
- */

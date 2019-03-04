@@ -98,13 +98,11 @@ class PlayingPageState extends State<PlayingPage> {
       audioplayer.position != null ? audioplayer.position.toString().split('.').first : '';
 
   void saveFavTrack(String track, List trackList) async {
-    print("TRACKLISSSSSSSSSSSST: " + trackList.toString());
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (track != "") {
       try {
         trackList.add(track);
       } catch(e) {
-        print("YOYOYOYOOYOYO");
         prefs.setStringList("favTracks", [track]);
         return null;
       }

@@ -37,7 +37,6 @@ class _LibraryState extends State<Library>{
   @override
   void initState() {
     super.initState();
-    print("in library, playerstate is ${audioplayer.playerState.toString()}");
     initAudioPlayer();
   }
 

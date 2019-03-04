@@ -182,9 +182,3 @@ class ShowAlbumState extends State<ShowAlbum> {
     );
   }
 }
-
-/*
-sortedTrackList.sort((dynamic a, dynamic b) {
-      return a[1].toString().compareTo(b[1]);
-    });
- */

@@ -16,7 +16,6 @@ class FavouritesPageState extends State<FavouritesPage>{
   @override
   void initState() {
     super.initState();
-    print("AUDIOPLAYER IS " + audioplayer.favList.toString());
     if (audioplayer.favList != null) {
       for (var track in audioplayer.favList) {
         favListMetaData.add(audioplayer.allMetaData[audioplayer.allFilePaths.indexOf(track)]);
