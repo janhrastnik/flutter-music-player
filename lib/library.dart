@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
 import 'audioplayer.dart' as audioplayer;
-import 'package:audioplayer/audioplayer.dart';
 import 'playingpage.dart';
-import 'favourites.dart';
-import 'home.dart';
+import 'package:audioplayer/audioplayer.dart';
 
 String img = "images/noimage.png";
 
@@ -40,14 +38,30 @@ class _LibraryState extends State<Library>{
   void initState() {
     super.initState();
     print("in library, playerstate is ${audioplayer.playerState.toString()}");
+    initAudioPlayer();
   }
 
-  getImage(i) {
-    if (widget.metadata[i][2]!= "") {
-      return Image.memory(widget.metadata[i][2], width: MediaQuery.of(context).size.width/7,);
-    } else {
-      return Image.asset(img, width: MediaQuery.of(context).size.width/7);
-    }
+  void initAudioPlayer() {
+    audioplayer.audioPlayer = new AudioPlayer();
+    _positionSubscription = audioplayer.audioPlayer.onAudioPositionChanged
+        .listen((p) => setState(() => audioplayer.position = p));
+    _audioPlayerStateSubscription =
+        audioplayer.audioPlayer.onPlayerStateChanged.listen((s) {
+          if (s == AudioPlayerState.PLAYING) {
+            setState(() =>
+            audioplayer.duration = audioplayer.audioPlayer.duration);
+          } else if (s == AudioPlayerState.STOPPED) {
+            setState(() {
+              audioplayer.position = audioplayer.duration;
+            });
+          }
+        }, onError: (msg) {
+          setState(() {
+            // audioplayer.playerState = PlayerState.stopped;
+            audioplayer.duration = new Duration(seconds: 0);
+            audioplayer.position = new Duration(seconds: 0);
+          });
+        });
   }
 
   PlayerInfo() {
@@ -146,7 +160,7 @@ class _LibraryState extends State<Library>{
                           itemCount: widget.musicFiles.length,
                           itemBuilder: (BuildContext context, int index) {
                             return new ListTile(
-                              leading: getImage(index),
+                              leading: audioplayer.getImage(index, widget.metadata[index][2], context),
                               title: Text(widget.metadata[index][0]),
                               subtitle: Text(widget.metadata[index][1]),
                               onTap: () {

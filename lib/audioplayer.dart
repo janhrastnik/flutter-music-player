@@ -7,6 +7,9 @@ import 'playlistpage.dart';
 import 'favourites.dart';
 import 'library.dart';
 import 'package:random_color/random_color.dart';
+import 'artistpage.dart';
+
+String img = "images/noimage.png";
 
 // for playlists, play queue
 List queueFileList;
@@ -89,6 +92,14 @@ Future stop() async {
   await audioPlayer.stop();
 }
 
+getImage(i, imageData, context) {
+  if (imageData != "") {
+    return Image.memory(imageData, width: MediaQuery.of(context).size.width/7,);
+  } else {
+    return Image.asset(img, width: MediaQuery.of(context).size.width/7);
+  }
+}
+
 class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -143,6 +154,18 @@ class AppDrawer extends StatelessWidget {
               );
             },
           ),
+          InkWell(
+            child: ListTile(
+              title: Text("Artists"),
+            ),
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (BuildContext context) => ArtistPage(
+                  )
+              )
+              );
+            },
+          )
         ],
       ),
     );

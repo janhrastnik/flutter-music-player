@@ -35,9 +35,13 @@ public class MainActivity extends FlutterActivity {
             mmr.setDataSource(filepath);
             String title = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
             String artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+            String album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
+            String number = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER);
             l.add(title);
             l.add(artist);
             l.add("");
+            l.add(album);
+            l.add(number);
             metadata.add(l);
           }
           result.success(metadata);

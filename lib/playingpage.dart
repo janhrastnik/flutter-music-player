@@ -8,6 +8,7 @@ import 'home.dart';
 import 'package:audioplayer/audioplayer.dart';
 import 'playlistpage.dart';
 import 'package:random_color/random_color.dart';
+import 'artistpage.dart';
 
 class PlayingPage extends StatefulWidget {
   var filePath;
@@ -27,6 +28,7 @@ class PlayingPageState extends State<PlayingPage> {
   StreamSubscription _audioPlayerStateSubscription;
   var missingImg = AssetImage("images/noimage.png");
   final key = GlobalKey<ScaffoldState>();
+
   @override
   void initState() {
     initAudioPlayer();
@@ -55,6 +57,14 @@ class PlayingPageState extends State<PlayingPage> {
       audioplayer.favList = l;
     });
     audioplayer.currTrackName = widget.filePath;
+  }
+
+  @override
+  void dispose() {
+    _positionSubscription.cancel();
+    _audioPlayerStateSubscription.cancel();
+    audioplayer.stop();
+    super.dispose();
   }
 
   void initAudioPlayer() {
@@ -205,6 +215,11 @@ class PlayingPageState extends State<PlayingPage> {
                     builder: (BuildContext context) =>
                         PlaylistPage()
                 ));
+              } else if (widget.backPage == "artistPage") {
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (BuildContext context) =>
+                        ArtistPage()
+                ));
               } else {
                 Navigator.of(context).push(MaterialPageRoute(
                     builder: (BuildContext context) =>
@@ -277,12 +292,12 @@ class PlayingPageState extends State<PlayingPage> {
               Column(
                   children: <Widget>[
                     Padding(
-                      padding: EdgeInsets.only(left: 30.0, right: 30.0, top: 20.0),
-                      child: Text(widget.fileMetaData[0], style: TextStyle(fontSize: 20.0)),
+                      padding: EdgeInsets.only(left: 30.0, right: 30.0, top: 12.0),
+                      child: Text(widget.fileMetaData[0], style: TextStyle(fontSize: 24.0)),
                     ),
                     Padding(
-                      padding: EdgeInsets.only(top: 4.0),
-                      child: Text(widget.fileMetaData[1], style: TextStyle(fontSize: 18.0,)),
+                      padding: EdgeInsets.only(top: 5.0),
+                      child: Text(widget.fileMetaData[1], style: TextStyle(fontSize: 18.0, color: Colors.black54)),
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,

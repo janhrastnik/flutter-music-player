@@ -25,14 +25,6 @@ class FavouritesPageState extends State<FavouritesPage>{
 
     }
   }
-
-  getImage(i) {
-    if (favListMetaData[i][2] != "") {
-      return Image.memory(favListMetaData[i][2], width: MediaQuery.of(context).size.width/7,);
-    } else {
-      return Image.asset(img, width: MediaQuery.of(context).size.width/7);
-    }
-  }
   
   @override
   Widget build(BuildContext context) {
@@ -47,7 +39,7 @@ class FavouritesPageState extends State<FavouritesPage>{
       itemBuilder: (BuildContext context, int index) {
         var track_metadata = favListMetaData[index];
         return ListTile(
-          leading: getImage(index),
+          leading: audioplayer.getImage(index, track_metadata[2], context),
           title: Text(track_metadata[0]),
           subtitle: Text(track_metadata[1]),
           onTap: () {

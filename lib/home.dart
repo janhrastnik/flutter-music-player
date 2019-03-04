@@ -74,71 +74,72 @@ class HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: audioplayer.AppDrawer(),
-        body: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            mainAxisSize: MainAxisSize.max,
-            children: <Widget>[
+        body: SafeArea(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisSize: MainAxisSize.max,
+              children: <Widget>[
                 Padding(
-                  padding: EdgeInsets.only(top: 30.0),
-                  child: Column(
-                    children: <Widget>[
-                      Text("Your queue", style: TextStyle(fontSize: 22.0),),
-                      Container(
-                        padding: EdgeInsets.only(left: 70.0, right: 70.0),
-                        child: Divider(color: Colors.black54,),
-                      )
-                    ],
-                  )
+                    padding: EdgeInsets.only(top: 30.0),
+                    child: Column(
+                      children: <Widget>[
+                        Text("Your queue", style: TextStyle(fontSize: 22.0),),
+                        Container(
+                          padding: EdgeInsets.only(left: 70.0, right: 70.0),
+                          child: Divider(color: Colors.black54,),
+                        )
+                      ],
+                    )
                 ),
                 Expanded(
-                  child: audioplayer.queueMetaData != null ? ListView.builder( // play queue
-                    itemCount: audioplayer.queueMetaData.length,
-                    controller: _scrollController,
-                    scrollDirection: Axis.horizontal,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Padding(
-                        padding: EdgeInsets.only(bottom: 40.0, top: 10.0),
-                        child: Card(
-                          child: Material(
-                            color: index == audioplayer.currTrack ? Colors.limeAccent : Colors.lightBlueAccent,
-                            child: InkWell(
-                              child: Column(
-                                children: <Widget>[
-                                  audioplayer.queueMetaData[index][2] != "" ? Padding(padding: EdgeInsets.all(8.0), child: Image.memory(audioplayer.queueMetaData[index][2], width: 75.0,))
-                                     : Container(),
-                                  Container(
-                                    padding: EdgeInsets.only(left: 5.0, right: 5.0),
-                                    width: 100.0,
-                                    child: Center(child: Text(
-                                      audioplayer.queueMetaData[index][0],
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    )),
-                                  ),
-                                ],
+                    child: audioplayer.queueMetaData != null ? ListView.builder( // play queue
+                      itemCount: audioplayer.queueMetaData.length,
+                      controller: _scrollController,
+                      scrollDirection: Axis.horizontal,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Padding(
+                            padding: EdgeInsets.only(bottom: 40.0, top: 10.0),
+                            child: Card(
+                              child: Material(
+                                  color: index == audioplayer.currTrack ? Colors.limeAccent : Colors.lightBlueAccent,
+                                  child: InkWell(
+                                    child: Column(
+                                      children: <Widget>[
+                                        audioplayer.queueMetaData[index][2] != "" ? Padding(padding: EdgeInsets.all(8.0), child: Image.memory(audioplayer.queueMetaData[index][2], width: 75.0,))
+                                            : Container(),
+                                        Container(
+                                          padding: EdgeInsets.only(left: 5.0, right: 5.0),
+                                          width: 100.0,
+                                          child: Center(child: Text(
+                                            audioplayer.queueMetaData[index][0],
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          )),
+                                        ),
+                                      ],
+                                    ),
+                                    onTap: () {
+                                      audioplayer.currTrack = index;
+                                      Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                              builder: (BuildContext context) => new PlayingPage(
+                                                filePath: audioplayer.queueFileList[index],
+                                                fileMetaData: audioplayer.queueMetaData[index][0] != null ?
+                                                audioplayer.queueMetaData[index] :
+                                                [audioplayer.queueMetaData[index], "unknown"],
+                                                backPage: "homePage",
+                                              )
+                                          )
+                                      );
+                                    },
+                                  )
                               ),
-                              onTap: () {
-                                audioplayer.currTrack = index;
-                                Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                        builder: (BuildContext context) => new PlayingPage(
-                                          filePath: audioplayer.queueFileList[index],
-                                          fileMetaData: audioplayer.queueMetaData[index][0] != null ?
-                                          audioplayer.queueMetaData[index] :
-                                          [audioplayer.queueMetaData[index], "unknown"],
-                                          backPage: "homePage",
-                                        )
-                                    )
-                                );
-                              },
                             )
-                          ),
-                        )
-                      );
-                    },
+                        );
+                      },
                     ) : Padding(padding: EdgeInsets.all(70.0), child: Text("Your queue is empty", style: TextStyle(
-                      fontStyle: FontStyle.italic, color: Colors.grey),),
-                  )
+                        fontStyle: FontStyle.italic, color: Colors.grey),),
+                    )
                 ),
                 Container(
                   decoration: BoxDecoration(
@@ -230,8 +231,9 @@ class HomePageState extends State<HomePage> {
                     ],
                   ),
                 ),
-            ],
-                  ),
+              ],
+            ),
+        )
                 );
   }
 }

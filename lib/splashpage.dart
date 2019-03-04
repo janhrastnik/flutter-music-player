@@ -24,11 +24,7 @@ class SplashScreenState extends State<SplashScreen> {
   List _metaData;
   static const platform = const MethodChannel('demo.janhrastnik.com/info');
   List _musicFiles = [];
-
-  _requestExtDirectory() {
-    var dir = getExternalStorageDirectory();
-    return dir;
-  }
+  RegExp exp = RegExp(r"^([^\/]+)");
 
   void wrap() async {
     await getFiles();
@@ -47,12 +43,22 @@ class SplashScreenState extends State<SplashScreen> {
             if (data[i][1] == null) {
               _metaData[i][1] = "Unknown Artist";
             }
+            if (data[i][3] == null) {
+              _metaData[i][3] = "Unknown Album";
+            }
+          }
+          if (_metaData[i][4] != null) {
+            Iterable<Match> matches = exp.allMatches(_metaData[i][4]);
+            for (Match match in matches) {
+              _metaData[i][4] = match.group(0);
+            }
+          } else {
+            _metaData[i][4] = "0";
           }
         }
       });
-      // print("metaData is: " + _metaData.toString());
     });
-    for (var i = 0; i < _musicFiles.length; i++) {
+    for (var i = 0; i < _musicFiles.length; i++) { // we get the album art
       try {
         image1 = await Mp3MetaData.getAlbumArt(_musicFiles[i]);
         _metaData[i][2] = image1;
@@ -75,6 +81,17 @@ class SplashScreenState extends State<SplashScreen> {
             if (fileOrDir.path.toString().endsWith(".mp3")) {
               _musicFiles.add(fileOrDir.path);
             }
+          }
+          try { // tries to find external sd card
+            var extSdDir = Directory('/mnt/m_external_sd/download');
+            List sdContents = extSdDir.listSync(recursive: true);
+            for (var fileOrDir in sdContents) {
+              if (fileOrDir.path.toString().endsWith(".mp3")) {
+                _musicFiles.add(fileOrDir.path);
+              }
+            }
+          } catch(e) {
+
           }
         } else {
         }
@@ -103,7 +120,6 @@ class SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    extDir = _requestExtDirectory();
     wrap();
   }
 

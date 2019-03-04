@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'audioplayer.dart' as audioplayer;
-import 'library.dart';
-import 'home.dart';
-import 'favourites.dart';
 import 'playingpage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -171,17 +168,6 @@ class ShowPlaylistState extends State<ShowPlaylist> {
   List playlistMetaData = [];
   List playlistFilePaths = [];
 
-  getImage(i) {
-    if (playlistMetaData[i][2] != "") {
-      return Image.memory(
-        playlistMetaData[i][2],
-        width: MediaQuery.of(context).size.width / 7,
-      );
-    } else {
-      return Image.asset(img, width: MediaQuery.of(context).size.width / 7);
-    }
-  }
-
   @override
   void initState() {
     super.initState();
@@ -253,13 +239,12 @@ class ShowPlaylistState extends State<ShowPlaylist> {
                         });
                       },
                       child: ListTile(
-                        leading: getImage(index),
+                        leading: audioplayer.getImage(index, playlistMetaData[index][2], context),
                         title: Text(playlistMetaData[index][0]),
                         subtitle: Text(playlistMetaData[index][1]),
                         trailing: Text((index + 1).toString()),
                         onTap: () {
                           // TRACK GETS PLAYED, PLAYLIST FILEPATHS AND METADATA GET ADDED TO PLAYQUEUE
-                          // YOU NEED PLAYLIST METADATA
                           print(
                               "FILEPATHS ARE " + playlistFilePaths.toString());
                           audioplayer.queueFileList = playlistFilePaths;
