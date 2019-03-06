@@ -27,24 +27,24 @@ public class MainActivity extends FlutterActivity {
 
         Map<String, Object> arguments = methodCall.arguments();
         MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-        List<List> metadata = new ArrayList();
         if (methodCall.method.equals("getMetaData")) {
-          List<String> filepaths = (ArrayList<String>) arguments.get("filepaths");
-          for (String filepath : filepaths) {
-            List<String> l = new ArrayList();
-            mmr.setDataSource(filepath);
-            String title = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
-            String artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
-            String album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
-            String number = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER);
-            l.add(title);
-            l.add(artist);
-            l.add("");
-            l.add(album);
-            l.add(number);
-            metadata.add(l);
-          }
-          result.success(metadata);
+          String filepath = (String) arguments.get("filepath");
+          System.out.print(filepath);
+          System.out.print(filepath);
+          System.out.print(filepath);
+          System.out.print(filepath);
+          List<String> l = new ArrayList();
+          mmr.setDataSource(filepath);
+          String title = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+          String artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+          String album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
+          String number = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER);
+          l.add(title);
+          l.add(artist);
+          l.add("");
+          l.add(album);
+          l.add(number);
+          result.success(l);
         }
 
       }

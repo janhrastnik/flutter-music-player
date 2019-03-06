@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'dart:async';
 import 'audioplayer.dart' as audioplayer;
 import 'home.dart';
+import 'dart:convert';
 
 class SplashScreen extends StatefulWidget {
 
@@ -21,43 +22,73 @@ class SplashScreenState extends State<SplashScreen> {
   Directory extDir2;
   String kUrl;
   Uint8List image1;
-  List _metaData;
+  List _metaData = [];
   static const platform = const MethodChannel('demo.janhrastnik.com/info');
   List _musicFiles = [];
   RegExp exp = RegExp(r"^([^\/]+)");
+  Map mapMetaData = Map();
+
+  Future<String> get _localPath async {
+    final directory = await getApplicationDocumentsDirectory();
+
+    return directory.path;
+  }
+
+  Future<File> get _localFile async {
+    final path = await _localPath;
+    return File('$path/filesmetadata.json');
+  }
+
+  Future<File> writeStoredMetaData(Map fileMetaData) async {
+    final file = await _localFile;
+    var jsonData = jsonEncode(fileMetaData);
+    // Write the file
+    return file.writeAsString(jsonData);
+  }
+
+
+  Future readStoredMetaData() async {
+    try {
+      final file = await _localFile;
+
+      // Read the file
+      String contents = await file.readAsString();
+      return jsonDecode(contents);
+    } catch (e) {
+      // If encountering an error, return 0
+      return 0;
+    }
+  }
 
   void wrap() async {
     await getFiles();
-    _getMetaData().then((data) {
-      setState(() {
-        _metaData = data;
-        for (var i = 0; i < _musicFiles.length; i++) {
-          if (data[i][0] == null) {
-            String s = _musicFiles[i];
-            for (var n = s.length; n > 0; n--) {
-              if (s.substring(n - 2, n - 1) == "/") {
-                _metaData[i][0] = s.substring(n-1, s.length - 4);
-                break;
-              }
-            }
-            if (data[i][1] == null) {
-              _metaData[i][1] = "Unknown Artist";
-            }
-            if (data[i][3] == null) {
-              _metaData[i][3] = "Unknown Album";
-            }
-          }
-          if (_metaData[i][4] != null) {
-            Iterable<Match> matches = exp.allMatches(_metaData[i][4]);
-            for (Match match in matches) {
-              _metaData[i][4] = match.group(0);
-            }
-          } else {
-            _metaData[i][4] = "0";
+    await _getAllMetaData();
+    for (var i = 0; i < _musicFiles.length; i++) {
+      if (_metaData[i][0] == null) {
+        String s = _musicFiles[i];
+        for (var n = s.length; n > 0; n--) {
+          if (s.substring(n - 2, n - 1) == "/") {
+            _metaData[i][0] = s.substring(n-1, s.length - 4);
+            break;
           }
         }
-      });
-    });
+        if (_metaData[i][1] == null) {
+          _metaData[i][1] = "Unknown Artist";
+        }
+        if (_metaData[i][3] == null) {
+          _metaData[i][3] = "Unknown Album";
+        }
+      }
+      if (_metaData[i][4] != null) {
+        Iterable<Match> matches = exp.allMatches(_metaData[i][4]);
+        for (Match match in matches) {
+          _metaData[i][4] = match.group(0);
+        }
+      } else {
+        _metaData[i][4] = "0";
+      }
+    }
+
     for (var i = 0; i < _musicFiles.length; i++) { // we get the album art
       try {
         image1 = await Mp3MetaData.getAlbumArt(_musicFiles[i]);
@@ -65,6 +96,12 @@ class SplashScreenState extends State<SplashScreen> {
       } catch(e) {
       }
     }
+
+    for (var i = 0; i < _musicFiles.length; i++) {
+      mapMetaData[_musicFiles[i]] = _metaData[i];
+    }
+    writeStoredMetaData(mapMetaData);
+
     audioplayer.allMetaData = _metaData;
     audioplayer.allFilePaths = _musicFiles;
     onDoneLoading();
@@ -97,19 +134,29 @@ class SplashScreenState extends State<SplashScreen> {
         }
       });
     });
-    // print("musicfiles are: " + musicFiles.toString());
   }
 
-  Future _getMetaData() async {
-    var value;
-    try {
-      value = await platform.invokeMethod("getMetaData", <String, dynamic>{
-        'filepaths': _musicFiles
-      });
-    } catch(e) {
-      // print(e);
+  Future _getAllMetaData() async {
+    for (var track in _musicFiles) {
+      var data = await _getFileMetaData(track);
+      _metaData.add(data);
     }
-    // print("the extracted metadata is: " + value.toString());
+  }
+
+  Future _getFileMetaData(track) async {
+    print(track);
+    var value;
+      try { // some tracks crash PlatformException(error, setDataSource failed: status = 0xFFFFFFED, null)
+        if (mapMetaData[track] == null) {
+          value = await platform.invokeMethod("getMetaData", <String, dynamic>{
+            'filepath': track
+          });
+        } else {
+          value = mapMetaData[track];
+        }
+      } catch(e) {
+
+      }
     return value;
   }
 
@@ -120,7 +167,12 @@ class SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    wrap();
+    readStoredMetaData().then((data) {
+      if (data != 0) {
+        mapMetaData = data;
+      }
+      wrap();
+    });
   }
 
 
@@ -135,3 +187,16 @@ class SplashScreenState extends State<SplashScreen> {
     );
   }
 }
+
+/*
+Future _getMetaData() async {
+    var value;
+    try {
+      value = await platform.invokeMethod("getMetaData", <String, dynamic>{
+        'filepaths': _musicFiles
+      });
+    } catch(e) {
+    }
+    return value;
+  }
+ */
