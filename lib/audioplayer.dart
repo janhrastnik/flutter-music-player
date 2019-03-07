@@ -8,9 +8,8 @@ import 'favourites.dart';
 import 'library.dart';
 import 'package:random_color/random_color.dart';
 import 'artistpage.dart';
-
+import 'dart:typed_data';
 String img = "images/noimage.png";
-
 // for playlists, play queue
 List queueFileList;
 int currTrack;
@@ -19,7 +18,6 @@ List queueMetaData;
 // data of all tracks on device
 List allMetaData;
 List allFilePaths;
-
 // for favourites
 List<String> favList = [];
 
@@ -33,6 +31,11 @@ AudioPlayer audioPlayer;
 PlayerState playerState;
 Duration duration;
 Duration position;
+
+Future clearPrefs() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  prefs.clear();
+}
 
 Future getFavTrackList() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -93,8 +96,8 @@ Future stop() async {
 }
 
 getImage(i, imageData, context) {
-  if (imageData != "") {
-    return Image.memory(imageData, width: MediaQuery.of(context).size.width/7,);
+  if (imageData != null) {
+    return Image.memory(Uint8List.fromList(imageData.cast<int>()), width: MediaQuery.of(context).size.width/7,);
   } else {
     return Image.asset(img, width: MediaQuery.of(context).size.width/7);
   }

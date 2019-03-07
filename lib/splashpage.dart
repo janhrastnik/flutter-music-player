@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
-import 'package:mp3_meta_data/mp3_meta_data.dart';
 import 'dart:typed_data';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/services.dart';
@@ -63,6 +62,7 @@ class SplashScreenState extends State<SplashScreen> {
   void wrap() async {
     await getFiles();
     await _getAllMetaData();
+    print(_musicFiles.toString());
     for (var i = 0; i < _musicFiles.length; i++) {
       if (_metaData[i][0] == null) {
         String s = _musicFiles[i];
@@ -109,14 +109,14 @@ class SplashScreenState extends State<SplashScreen> {
             if (fileOrDir.path.toString().endsWith(".mp3")) {
               _musicFiles.add(fileOrDir.path);
             }
-          } // tries to find external sd card
+          }/* // tries to find external sd card
             var extSdDir = Directory('/mnt/m_external_sd/download');
             List sdContents = extSdDir.listSync(recursive: true);
             for (var fileOrDir in sdContents) {
               if (fileOrDir.path.toString().endsWith(".mp3")) {
                 _musicFiles.add(fileOrDir.path);
               }
-            }
+            }*/
         } else {
         }
       });
@@ -135,12 +135,10 @@ class SplashScreenState extends State<SplashScreen> {
     var value;
       try { // some tracks crash PlatformException(error, setDataSource failed: status = 0xFFFFFFED, null)
         if (mapMetaData[track] == null) {
-          print("this is bad");
           value = await platform.invokeMethod("getMetaData", <String, dynamic>{
             'filepath': track
           });
         } else {
-          print("this is what we want to see");
           value = mapMetaData[track];
         }
       } catch(e) {

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'audioplayer.dart' as audioplayer;
 import 'playingpage.dart';
-import 'home.dart';
-import 'library.dart';
 
 String img = "images/noimage.png";
 
@@ -17,6 +15,7 @@ class FavouritesPageState extends State<FavouritesPage>{
   void initState() {
     super.initState();
     if (audioplayer.favList != null) {
+      print("favlist is " + audioplayer.favList.toString());
       for (var track in audioplayer.favList) {
         favListMetaData.add(audioplayer.allMetaData[audioplayer.allFilePaths.indexOf(track)]);
       }

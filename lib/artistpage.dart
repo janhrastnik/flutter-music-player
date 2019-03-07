@@ -141,7 +141,12 @@ class ShowAlbumState extends State<ShowAlbum> {
 
     int count = 0;
     for (var track in widget.tracks) {
-      trackNumbers[int.parse(track[1])] = count;
+      print("track is " + track.toString());
+      if (trackNumbers[int.parse(track[1])] == null) {
+        trackNumbers[int.parse(track[1])] = count;
+      } else {
+        trackNumbers[count+1] = count;
+      }
       count += 1;
     }
 

@@ -39,7 +39,6 @@ public class MainActivity extends FlutterActivity {
           }
           l.add(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM));
           l.add(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER));
-          mmr.release();
           result.success(l);
         }
 
