@@ -89,19 +89,10 @@ class SplashScreenState extends State<SplashScreen> {
       }
     }
 
-    for (var i = 0; i < _musicFiles.length; i++) { // we get the album art
-      try {
-        image1 = await Mp3MetaData.getAlbumArt(_musicFiles[i]);
-        _metaData[i][2] = image1;
-      } catch(e) {
-      }
-    }
-
     for (var i = 0; i < _musicFiles.length; i++) {
       mapMetaData[_musicFiles[i]] = _metaData[i];
     }
     writeStoredMetaData(mapMetaData);
-
     audioplayer.allMetaData = _metaData;
     audioplayer.allFilePaths = _musicFiles;
     onDoneLoading();
@@ -118,8 +109,7 @@ class SplashScreenState extends State<SplashScreen> {
             if (fileOrDir.path.toString().endsWith(".mp3")) {
               _musicFiles.add(fileOrDir.path);
             }
-          }
-          try { // tries to find external sd card
+          } // tries to find external sd card
             var extSdDir = Directory('/mnt/m_external_sd/download');
             List sdContents = extSdDir.listSync(recursive: true);
             for (var fileOrDir in sdContents) {
@@ -127,9 +117,6 @@ class SplashScreenState extends State<SplashScreen> {
                 _musicFiles.add(fileOrDir.path);
               }
             }
-          } catch(e) {
-
-          }
         } else {
         }
       });
@@ -148,10 +135,12 @@ class SplashScreenState extends State<SplashScreen> {
     var value;
       try { // some tracks crash PlatformException(error, setDataSource failed: status = 0xFFFFFFED, null)
         if (mapMetaData[track] == null) {
+          print("this is bad");
           value = await platform.invokeMethod("getMetaData", <String, dynamic>{
             'filepath': track
           });
         } else {
+          print("this is what we want to see");
           value = mapMetaData[track];
         }
       } catch(e) {

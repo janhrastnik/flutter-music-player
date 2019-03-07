@@ -15,6 +15,7 @@ import java.util.Map;
 
 public class MainActivity extends FlutterActivity {
   private static final String CHANNEL = "demo.janhrastnik.com/info";
+  private static final MediaMetadataRetriever mmr = new MediaMetadataRetriever();
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -24,26 +25,21 @@ public class MainActivity extends FlutterActivity {
     new MethodChannel(getFlutterView(), CHANNEL).setMethodCallHandler(new MethodChannel.MethodCallHandler() {
       @Override
       public void onMethodCall(MethodCall methodCall, MethodChannel.Result result) {
-
         Map<String, Object> arguments = methodCall.arguments();
-        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
         if (methodCall.method.equals("getMetaData")) {
           String filepath = (String) arguments.get("filepath");
-          System.out.print(filepath);
-          System.out.print(filepath);
-          System.out.print(filepath);
-          System.out.print(filepath);
-          List<String> l = new ArrayList();
+          List l = new ArrayList();
           mmr.setDataSource(filepath);
-          String title = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
-          String artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
-          String album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
-          String number = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER);
-          l.add(title);
-          l.add(artist);
-          l.add("");
-          l.add(album);
-          l.add(number);
+          l.add(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE));
+          l.add(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST));
+          try {
+            l.add(mmr.getEmbeddedPicture());
+          } catch (Exception e) {
+            l.add("");
+          }
+          l.add(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM));
+          l.add(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER));
+          mmr.release();
           result.success(l);
         }
 
