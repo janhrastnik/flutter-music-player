@@ -24,6 +24,8 @@ List<String> favList = [];
 // all playlist names
 List<String> playlistNames;
 
+List imageList = List();
+
 RandomColor randomColor = RandomColor();
 
 enum PlayerState { stopped, playing, paused }
@@ -95,8 +97,9 @@ Future stop() async {
   await audioPlayer.stop();
 }
 
-getImage(i, imageData, context) {
-  if (imageData != null) {
+getImage(i, imageIndex, context) {
+  if (imageIndex != null) {
+    var imageData = imageList[imageIndex];
     return Image.memory(Uint8List.fromList(imageData.cast<int>()), width: MediaQuery.of(context).size.width/7,);
   } else {
     return Image.asset(img, width: MediaQuery.of(context).size.width/7);

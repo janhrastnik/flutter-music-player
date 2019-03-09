@@ -21,10 +21,14 @@ class SplashScreenState extends State<SplashScreen> {
   Directory extDir2;
   String kUrl;
   Uint8List image1;
-  List _metaData = [];
-  static const platform = const MethodChannel('demo.janhrastnik.com/info');
-  List _musicFiles = [];
   RegExp exp = RegExp(r"^([^\/]+)");
+  static const platform = const MethodChannel('demo.janhrastnik.com/info');
+
+  // used for app
+  List _metaData = [];
+  List _musicFiles = [];
+
+  // used for json file
   Map mapMetaData = Map();
 
   Future<String> get _localPath async {
@@ -40,7 +44,8 @@ class SplashScreenState extends State<SplashScreen> {
 
   Future<File> writeStoredMetaData(Map fileMetaData) async {
     final file = await _localFile;
-    var jsonData = jsonEncode(fileMetaData);
+    var jsonData = jsonEncode([fileMetaData, audioplayer.imageList]);
+    // print(jsonData);
     // Write the file
     return file.writeAsString(jsonData);
   }
@@ -54,6 +59,7 @@ class SplashScreenState extends State<SplashScreen> {
       String contents = await file.readAsString();
       return jsonDecode(contents);
     } catch (e) {
+      print(e);
       // If encountering an error, return 0
       return 0;
     }
@@ -62,7 +68,6 @@ class SplashScreenState extends State<SplashScreen> {
   void wrap() async {
     await getFiles();
     await _getAllMetaData();
-    print(_musicFiles.toString());
     for (var i = 0; i < _musicFiles.length; i++) {
       if (_metaData[i][0] == null) {
         String s = _musicFiles[i];
@@ -95,6 +100,7 @@ class SplashScreenState extends State<SplashScreen> {
     writeStoredMetaData(mapMetaData);
     audioplayer.allMetaData = _metaData;
     audioplayer.allFilePaths = _musicFiles;
+    print(audioplayer.allMetaData);
     onDoneLoading();
   }
 
@@ -109,14 +115,14 @@ class SplashScreenState extends State<SplashScreen> {
             if (fileOrDir.path.toString().endsWith(".mp3")) {
               _musicFiles.add(fileOrDir.path);
             }
-          }/* // tries to find external sd card
+          } // tries to find external sd card
             var extSdDir = Directory('/mnt/m_external_sd/download');
             List sdContents = extSdDir.listSync(recursive: true);
             for (var fileOrDir in sdContents) {
               if (fileOrDir.path.toString().endsWith(".mp3")) {
                 _musicFiles.add(fileOrDir.path);
               }
-            }*/
+            }
         } else {
         }
       });
@@ -126,24 +132,45 @@ class SplashScreenState extends State<SplashScreen> {
   Future _getAllMetaData() async {
     for (var track in _musicFiles) {
       var data = await _getFileMetaData(track);
-      _metaData.add(data);
+      // print("DATA IS " + data.toString());
+      print(audioplayer.imageList.length);
+      if (data[2] != null) {
+          if (audioplayer.imageList.contains(data[2].toString())) {
+            var index = audioplayer.imageList.indexOf(data[2]);
+            if (index == -1) {
+              data[2] = 0;
+            } else {
+              data[2] = index;
+            }
+            _metaData.add(data);
+          } else {
+            audioplayer.imageList.add(data[2].toString());
+            data[2] = audioplayer.imageList.length - 1;
+            _metaData.add(data);
+          }
+      } else {
+        _metaData.add(data);
+      }
     }
   }
 
   Future _getFileMetaData(track) async {
-    print(track);
     var value;
-      try { // some tracks crash PlatformException(error, setDataSource failed: status = 0xFFFFFFED, null)
-        if (mapMetaData[track] == null) {
-          value = await platform.invokeMethod("getMetaData", <String, dynamic>{
-            'filepath': track
-          });
-        } else {
-          value = mapMetaData[track];
-        }
-      } catch(e) {
-
+    try { // some tracks crash PlatformException(error, setDataSource failed: status = 0xFFFFFFED, null)
+      if (mapMetaData[track] == null) {
+        print("FETCHING METADATA FOR " + track.toString());
+        value = await platform.invokeMethod("getMetaData", <String, dynamic>{
+          'filepath': track
+        });
+        print("FETCHED METADATA: " + value.toString());
+      } else {
+        value = mapMetaData[track];
+        // print("VALUE IS " + value.toString());
+        value[2] = audioplayer.imageList[value[2]];
       }
+    } catch(e) {
+
+    }
     return value;
   }
 
@@ -156,7 +183,8 @@ class SplashScreenState extends State<SplashScreen> {
     super.initState();
     readStoredMetaData().then((data) {
       if (data != 0) {
-        mapMetaData = data;
+        mapMetaData = data[0];
+        audioplayer.imageList = data[1];
       }
       wrap();
     });
@@ -186,4 +214,26 @@ Future _getMetaData() async {
     }
     return value;
   }
+
+  bool flag = true;
+        for (var image in audioplayer.imageList) {
+          if (image.toString() == data[2].toString()) {
+            flag = false;
+            int index = audioplayer.imageList.indexOf(data[2].toString());
+            if (index == -1) {
+              data[2] = 0;
+            } else {
+              data[2] = index;
+            }
+            _metaData.add(data);
+          }
+        }
+        if (flag == true) {
+          audioplayer.imageList.add(data[2]);
+          data[2] = audioplayer.imageList.indexOf(data[2]);
+          _metaData.add(data);
+        }
+
+
+
  */

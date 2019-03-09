@@ -105,7 +105,14 @@ class HomePageState extends State<HomePage> {
                                   child: InkWell(
                                     child: Column(
                                       children: <Widget>[
-                                        audioplayer.queueMetaData[index][2] != "" ? Padding(padding: EdgeInsets.all(8.0), child: Image.memory(audioplayer.queueMetaData[index][2], width: 75.0,))
+                                        audioplayer.queueMetaData[index][2] != "" ? Padding(
+                                            padding: EdgeInsets.all(8.0),
+                                            child: audioplayer.getImage(
+                                                index,
+                                                audioplayer.queueMetaData[index][2],
+                                                context
+                                            )
+                                        )
                                             : Container(),
                                         Container(
                                           padding: EdgeInsets.only(left: 5.0, right: 5.0),

@@ -1,7 +1,10 @@
 package janhrastnik.musicplayer2;
 
+import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.os.Bundle;
+import android.renderscript.Sampler;
+
 import io.flutter.app.FlutterActivity;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
@@ -28,6 +31,7 @@ public class MainActivity extends FlutterActivity {
         Map<String, Object> arguments = methodCall.arguments();
         if (methodCall.method.equals("getMetaData")) {
           String filepath = (String) arguments.get("filepath");
+          System.out.println(filepath);
           List l = new ArrayList();
           mmr.setDataSource(filepath);
           l.add(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE));
