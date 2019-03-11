@@ -7,6 +7,7 @@ import 'dart:async';
 import 'audioplayer.dart' as audioplayer;
 import 'home.dart';
 import 'dart:convert';
+import 'package:crypto/crypto.dart';
 
 class SplashScreen extends StatefulWidget {
 
@@ -44,7 +45,7 @@ class SplashScreenState extends State<SplashScreen> {
 
   Future<File> writeStoredMetaData(Map fileMetaData) async {
     final file = await _localFile;
-    var jsonData = jsonEncode([fileMetaData, audioplayer.imageList]);
+    var jsonData = jsonEncode([fileMetaData, audioplayer.imageMap]);
     // print(jsonData);
     // Write the file
     return file.writeAsString(jsonData);
@@ -133,21 +134,22 @@ class SplashScreenState extends State<SplashScreen> {
     for (var track in _musicFiles) {
       var data = await _getFileMetaData(track);
       // print("DATA IS " + data.toString());
-      print(audioplayer.imageList.length);
+      print(audioplayer.imageMap.length);
       if (data[2] != null) {
-          if (audioplayer.imageList.contains(data[2].toString())) {
-            var index = audioplayer.imageList.indexOf(data[2]);
-            if (index == -1) {
-              data[2] = 0;
-            } else {
-              data[2] = index;
-            }
-            _metaData.add(data);
-          } else {
-            audioplayer.imageList.add(data[2].toString());
-            data[2] = audioplayer.imageList.length - 1;
+        var digest = sha1.convert(data[2]).toString();
+        var flag = false;
+        for (var imagehash in audioplayer.imageMap.keys) {
+          if (imagehash == digest) {
+            flag = true;
+            data[2] = digest;
             _metaData.add(data);
           }
+        }
+        if (flag == false) {
+          audioplayer.imageMap[digest] = data[2];
+          data[2] = digest;
+          _metaData.add(data);
+        }
       } else {
         _metaData.add(data);
       }
@@ -166,7 +168,7 @@ class SplashScreenState extends State<SplashScreen> {
       } else {
         value = mapMetaData[track];
         // print("VALUE IS " + value.toString());
-        value[2] = audioplayer.imageList[value[2]];
+        value[2] = audioplayer.imageMap[value[2]].cast<int>();
       }
     } catch(e) {
 
@@ -184,7 +186,7 @@ class SplashScreenState extends State<SplashScreen> {
     readStoredMetaData().then((data) {
       if (data != 0) {
         mapMetaData = data[0];
-        audioplayer.imageList = data[1];
+        audioplayer.imageMap = data[1];
       }
       wrap();
     });

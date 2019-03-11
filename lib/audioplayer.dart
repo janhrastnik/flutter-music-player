@@ -24,7 +24,7 @@ List<String> favList = [];
 // all playlist names
 List<String> playlistNames;
 
-List imageList = List();
+Map imageMap = Map();
 
 RandomColor randomColor = RandomColor();
 
@@ -99,7 +99,7 @@ Future stop() async {
 
 getImage(i, imageIndex, context) {
   if (imageIndex != null) {
-    var imageData = imageList[imageIndex];
+    var imageData = imageMap[imageIndex];
     return Image.memory(Uint8List.fromList(imageData.cast<int>()), width: MediaQuery.of(context).size.width/7,);
   } else {
     return Image.asset(img, width: MediaQuery.of(context).size.width/7);
