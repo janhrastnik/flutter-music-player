@@ -97,7 +97,7 @@ Future stop() async {
   await audioPlayer.stop();
 }
 
-getImage(i, imageIndex, context) {
+getImage(imageIndex, context) {
   if (imageIndex != null) {
     var imageData = imageMap[imageIndex];
     return Image.memory(Uint8List.fromList(imageData.cast<int>()), width: MediaQuery.of(context).size.width/7,);

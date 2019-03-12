@@ -46,7 +46,6 @@ class SplashScreenState extends State<SplashScreen> {
   Future<File> writeStoredMetaData(Map fileMetaData) async {
     final file = await _localFile;
     var jsonData = jsonEncode([fileMetaData, audioplayer.imageMap]);
-    // print(jsonData);
     // Write the file
     return file.writeAsString(jsonData);
   }
@@ -133,7 +132,6 @@ class SplashScreenState extends State<SplashScreen> {
   Future _getAllMetaData() async {
     for (var track in _musicFiles) {
       var data = await _getFileMetaData(track);
-      // print("DATA IS " + data.toString());
       print(audioplayer.imageMap.length);
       if (data[2] != null) {
         var digest = sha1.convert(data[2]).toString();
@@ -167,7 +165,6 @@ class SplashScreenState extends State<SplashScreen> {
         print("FETCHED METADATA: " + value.toString());
       } else {
         value = mapMetaData[track];
-        // print("VALUE IS " + value.toString());
         value[2] = audioplayer.imageMap[value[2]].cast<int>();
       }
     } catch(e) {
@@ -197,45 +194,14 @@ class SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return Container(
       child: Center(
-        child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(Colors.redAccent),
-        ),
+        child: Column(
+          children: <Widget>[
+            CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.redAccent),
+            ),
+          ],
+        )
       ),
     );
   }
 }
-
-/*
-Future _getMetaData() async {
-    var value;
-    try {
-      value = await platform.invokeMethod("getMetaData", <String, dynamic>{
-        'filepaths': _musicFiles
-      });
-    } catch(e) {
-    }
-    return value;
-  }
-
-  bool flag = true;
-        for (var image in audioplayer.imageList) {
-          if (image.toString() == data[2].toString()) {
-            flag = false;
-            int index = audioplayer.imageList.indexOf(data[2].toString());
-            if (index == -1) {
-              data[2] = 0;
-            } else {
-              data[2] = index;
-            }
-            _metaData.add(data);
-          }
-        }
-        if (flag == true) {
-          audioplayer.imageList.add(data[2]);
-          data[2] = audioplayer.imageList.indexOf(data[2]);
-          _metaData.add(data);
-        }
-
-
-
- */

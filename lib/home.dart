@@ -108,7 +108,6 @@ class HomePageState extends State<HomePage> {
                                         audioplayer.queueMetaData[index][2] != "" ? Padding(
                                             padding: EdgeInsets.all(8.0),
                                             child: audioplayer.getImage(
-                                                index,
                                                 audioplayer.queueMetaData[index][2],
                                                 context
                                             )

@@ -9,6 +9,7 @@ import 'package:audioplayer/audioplayer.dart';
 import 'playlistpage.dart';
 import 'package:random_color/random_color.dart';
 import 'artistpage.dart';
+import 'dart:typed_data';
 
 class PlayingPage extends StatefulWidget {
   var filePath;
@@ -21,13 +22,13 @@ class PlayingPage extends StatefulWidget {
 }
 
 class PlayingPageState extends State<PlayingPage> {
-  String img = "images/noimage.png";
   Color pageColor = audioplayer.randomColor.randomColor(colorBrightness: ColorBrightness.custom(Range(80, 83)));
   bool isFavorited;
   StreamSubscription _positionSubscription;
   StreamSubscription _audioPlayerStateSubscription;
   var missingImg = AssetImage("images/noimage.png");
   final key = GlobalKey<ScaffoldState>();
+  var img;
 
   @override
   void initState() {
@@ -57,6 +58,12 @@ class PlayingPageState extends State<PlayingPage> {
       audioplayer.favList = l;
     });
     audioplayer.currTrackName = widget.filePath;
+    if (widget.fileMetaData[2] != null) {
+      var imageData = audioplayer.imageMap[widget.fileMetaData[2]];
+      img = Image.memory(Uint8List.fromList(imageData.cast<int>()), width: 300.0); // mediaquery error
+    } else {
+      img = Image(image: missingImg,);
+    }
   }
 
   @override
@@ -76,10 +83,19 @@ class PlayingPageState extends State<PlayingPage> {
           if (s == AudioPlayerState.PLAYING) {
             setState(() =>
             audioplayer.duration = audioplayer.audioPlayer.duration);
-          } else if (s == AudioPlayerState.STOPPED) {
-            setState(() {
-              audioplayer.position = audioplayer.duration;
-            });
+          } else if (s == AudioPlayerState.COMPLETED) {
+            if (audioplayer.currTrack != audioplayer.queueFileList.length-1) {
+              audioplayer.currTrack++;
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (BuildContext context) => PlayingPage(
+                    filePath: audioplayer.queueFileList[audioplayer.currTrack],
+                    fileMetaData: audioplayer.queueMetaData[audioplayer.currTrack][0] != null
+                        ? audioplayer.queueMetaData[audioplayer.currTrack] : [audioplayer.queueFileList[audioplayer.currTrack], "unknown"],
+                    backPage: widget.backPage,
+                  )
+              )
+              );
+            }
           }
         }, onError: (msg) {
           setState(() {
@@ -139,14 +155,6 @@ class PlayingPageState extends State<PlayingPage> {
         ),
         padding: EdgeInsets.only(top: 30.0),
       );
-    }
-  }
-
-  getImage() {
-    try {
-      return Image.memory(widget.fileMetaData[2]);
-    } catch(e) {
-      return Image(image: missingImg,);
     }
   }
 
@@ -276,7 +284,7 @@ class PlayingPageState extends State<PlayingPage> {
             children: <Widget>[
               Container(
                 color: Colors.white,
-                  child: getImage(),
+                  child: img,
                   padding: EdgeInsets.only(
                     left: MediaQuery.of(context).size.width/6,
                     right: MediaQuery.of(context).size.width/6,

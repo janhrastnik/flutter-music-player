@@ -37,7 +37,7 @@ class FavouritesPageState extends State<FavouritesPage>{
       itemBuilder: (BuildContext context, int index) {
         var track_metadata = favListMetaData[index];
         return ListTile(
-          leading: audioplayer.getImage(index, track_metadata[2], context),
+          leading: audioplayer.getImage(track_metadata[2], context),
           title: Text(track_metadata[0]),
           subtitle: Text(track_metadata[1]),
           onTap: () {

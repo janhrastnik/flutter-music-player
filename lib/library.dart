@@ -159,7 +159,7 @@ class _LibraryState extends State<Library>{
                           itemCount: widget.musicFiles.length,
                           itemBuilder: (BuildContext context, int index) {
                             return new ListTile(
-                              leading: audioplayer.getImage(index, widget.metadata[index][2], context),
+                              leading: audioplayer.getImage(widget.metadata[index][2], context),
                               title: Text(widget.metadata[index][0]),
                               subtitle: Text(widget.metadata[index][1]),
                               onTap: () {

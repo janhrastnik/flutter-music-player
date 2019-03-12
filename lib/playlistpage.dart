@@ -239,7 +239,7 @@ class ShowPlaylistState extends State<ShowPlaylist> {
                         });
                       },
                       child: ListTile(
-                        leading: audioplayer.getImage(index, playlistMetaData[index][2], context),
+                        leading: audioplayer.getImage(playlistMetaData[index][2], context),
                         title: Text(playlistMetaData[index][0]),
                         subtitle: Text(playlistMetaData[index][1]),
                         trailing: Text((index + 1).toString()),

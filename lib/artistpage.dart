@@ -169,7 +169,7 @@ class ShowAlbumState extends State<ShowAlbum> {
       body: ListView.builder(
           itemCount: widget.tracks.length,
           itemBuilder: (BuildContext context, int index) => ListTile(
-            leading: audioplayer.getImage(index, sortedAlbumMetaData[index][2], context),
+            leading: audioplayer.getImage(sortedAlbumMetaData[index][2], context),
             title: Text(sortedAlbumMetaData[index][0].toString()),
             subtitle: Text(sortedAlbumMetaData[index][1].toString()),
             onTap: () {
