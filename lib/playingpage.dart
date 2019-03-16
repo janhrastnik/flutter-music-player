@@ -59,8 +59,8 @@ class PlayingPageState extends State<PlayingPage> {
     });
     audioplayer.currTrackName = widget.filePath;
     if (widget.fileMetaData[2] != null) {
-      var imageData = audioplayer.imageMap[widget.fileMetaData[2]];
-      img = Image.memory(Uint8List.fromList(imageData.cast<int>()), width: 300.0); // mediaquery error
+      // var imageData = audioplayer.imageMap[widget.fileMetaData[2]];
+      // img = Image.memory(Uint8List.fromList(imageData.cast<int>()), width: 300.0); // mediaquery error
     } else {
       img = Image(image: missingImg,);
     }

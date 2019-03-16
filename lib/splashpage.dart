@@ -24,6 +24,7 @@ class SplashScreenState extends State<SplashScreen> {
   Uint8List image1;
   RegExp exp = RegExp(r"^([^\/]+)");
   static const platform = const MethodChannel('demo.janhrastnik.com/info');
+  var path;
 
   // used for app
   List _metaData = [];
@@ -39,15 +40,20 @@ class SplashScreenState extends State<SplashScreen> {
   }
 
   Future<File> get _localFile async {
-    final path = await _localPath;
+    path = await _localPath;
     return File('$path/filesmetadata.json');
   }
 
   Future<File> writeStoredMetaData(Map fileMetaData) async {
     final file = await _localFile;
-    var jsonData = jsonEncode([fileMetaData, audioplayer.imageMap]);
+    var jsonData = jsonEncode(fileMetaData);
     // Write the file
     return file.writeAsString(jsonData);
+  }
+
+  Future<File> writeImage(var hash, List<int> image) async {
+    File imagefile = File('$path/$hash');
+    return imagefile.writeAsBytes(image);
   }
 
 
@@ -66,6 +72,10 @@ class SplashScreenState extends State<SplashScreen> {
   }
 
   void wrap() async {
+    path = await _localPath;
+    audioplayer.appPath = path;
+    print("PATH IS " + audioplayer.appPath);
+    print("METADATA IS " + _metaData.toString());
     await getFiles();
     await _getAllMetaData();
     for (var i = 0; i < _musicFiles.length; i++) {
@@ -97,10 +107,11 @@ class SplashScreenState extends State<SplashScreen> {
     for (var i = 0; i < _musicFiles.length; i++) {
       mapMetaData[_musicFiles[i]] = _metaData[i];
     }
+    print("MAPMETADATA IS " + mapMetaData.toString());
     writeStoredMetaData(mapMetaData);
     audioplayer.allMetaData = _metaData;
     audioplayer.allFilePaths = _musicFiles;
-    print(audioplayer.allMetaData);
+    print(Directory(path).listSync().toString());
     onDoneLoading();
   }
 
@@ -130,25 +141,23 @@ class SplashScreenState extends State<SplashScreen> {
   }
 
   Future _getAllMetaData() async {
+    List images = Directory(path).listSync();
+    print("images are " + images.toString());
     for (var track in _musicFiles) {
       var data = await _getFileMetaData(track);
-      print(audioplayer.imageMap.length);
+      print("DATA IS " + data.toString());
       if (data[2] != null) {
-        var digest = sha1.convert(data[2]).toString();
-        var flag = false;
-        for (var imagehash in audioplayer.imageMap.keys) {
-          if (imagehash == digest) {
-            flag = true;
-            data[2] = digest;
-            _metaData.add(data);
-          }
-        }
-        if (flag == false) {
-          audioplayer.imageMap[digest] = data[2];
+        if (data[2] is List<int>) {
+          print("HELLO 1");
+          var digest = sha1.convert(data[2]).toString();
+          writeImage(digest, data[2]);
           data[2] = digest;
+          _metaData.add(data);
+        } else {
           _metaData.add(data);
         }
       } else {
+        print("HELLO 2");
         _metaData.add(data);
       }
     }
@@ -158,14 +167,13 @@ class SplashScreenState extends State<SplashScreen> {
     var value;
     try { // some tracks crash PlatformException(error, setDataSource failed: status = 0xFFFFFFED, null)
       if (mapMetaData[track] == null) {
-        print("FETCHING METADATA FOR " + track.toString());
+        // print("FETCHING METADATA FOR " + track.toString());
         value = await platform.invokeMethod("getMetaData", <String, dynamic>{
           'filepath': track
         });
-        print("FETCHED METADATA: " + value.toString());
+        // print("FETCHED METADATA: " + value.toString());
       } else {
         value = mapMetaData[track];
-        value[2] = audioplayer.imageMap[value[2]].cast<int>();
       }
     } catch(e) {
 
@@ -182,8 +190,7 @@ class SplashScreenState extends State<SplashScreen> {
     super.initState();
     readStoredMetaData().then((data) {
       if (data != 0) {
-        mapMetaData = data[0];
-        audioplayer.imageMap = data[1];
+        mapMetaData = data;
       }
       wrap();
     });
@@ -205,3 +212,43 @@ class SplashScreenState extends State<SplashScreen> {
     );
   }
 }
+
+/*
+for (var track in _musicFiles) {
+      var data = await _getFileMetaData(track);
+      print(audioplayer.imageMap.length);
+      if (data[2] != null) {
+        var digest = sha1.convert(data[2]).toString();
+        var flag = false;
+        for (var imagehash in audioplayer.imageMap.keys) {
+          if (imagehash == digest) {
+            flag = true;
+            data[2] = digest;
+            _metaData.add(data);
+          }
+        }
+        if (flag == false) {
+          audioplayer.imageMap[digest] = data[2];
+          data[2] = digest;
+          _metaData.add(data);
+        }
+      } else {
+        _metaData.add(data);
+      }
+    }
+
+
+
+
+    else if (data[2] is String) {
+          print("DATA IS " + data[2]);
+          for (var image in images) {
+            image = image.toString();
+            if (image.substring(image.length - data[2].length) == data[2]) {
+              print("images are the same");
+            }
+          }
+        }
+
+
+ */
