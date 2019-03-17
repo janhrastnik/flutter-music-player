@@ -25,6 +25,8 @@ class SplashScreenState extends State<SplashScreen> {
   RegExp exp = RegExp(r"^([^\/]+)");
   static const platform = const MethodChannel('demo.janhrastnik.com/info');
   var path;
+  String loadingTrack;
+  double loadingTrackNumber = 0.0;
 
   // used for app
   List _metaData = [];
@@ -42,6 +44,13 @@ class SplashScreenState extends State<SplashScreen> {
   Future<File> get _localFile async {
     path = await _localPath;
     return File('$path/filesmetadata.json');
+  }
+
+  void updateLoadingTrack(track, number, size) {
+    setState(() {
+      loadingTrack = track;
+      loadingTrackNumber = number/size;
+    });
   }
 
   Future<File> writeStoredMetaData(Map fileMetaData) async {
@@ -140,6 +149,7 @@ class SplashScreenState extends State<SplashScreen> {
   Future _getAllMetaData() async {
     for (var track in _musicFiles) {
       var data = await _getFileMetaData(track);
+      updateLoadingTrack(track, _musicFiles.indexOf(track), _musicFiles.length);
       if (data[2] != null) {
         if (data[2] is List<int>) {
           var digest = sha1.convert(data[2]).toString();
@@ -189,15 +199,28 @@ class SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Center(
-        child: Column(
-          children: <Widget>[
-            CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.redAccent),
-            ),
-          ],
-        )
+    return Scaffold(
+      body: Container(
+        child: Center(
+            child: Padding(
+              padding: EdgeInsets.all(12.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Padding(
+                    padding: EdgeInsets.all(10.0),
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.blueAccent),
+                    ),
+                  ),
+                  Text("Loading track: $loadingTrack"),
+                  LinearProgressIndicator(
+                    value: loadingTrackNumber,
+                  ),
+                ],
+              ),
+            )
+        ),
       ),
     );
   }
