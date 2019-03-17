@@ -76,6 +76,7 @@ class ShowArtistAlbumsState extends State<ShowArtistAlbums> {
       }
     }
     albumsNames = albums.keys.toList();
+    print("ALBUMS ARE " + albumsNames.toString());
   }
 
   @override
@@ -87,7 +88,7 @@ class ShowArtistAlbumsState extends State<ShowArtistAlbums> {
       body: ListView.builder(
         itemCount: albumsNames.length,
         itemBuilder: (BuildContext context, int index) => ListTile(
-          title: Text(albumsNames[index]),
+          title: albumsNames[index] != null ? Text(albumsNames[index]) : Text("Unknown Album"),
           onTap: () {
             Navigator.of(context).push(MaterialPageRoute(
                 builder: (BuildContext context) => ShowAlbum(
@@ -164,7 +165,7 @@ class ShowAlbumState extends State<ShowAlbum> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.albumName),
+        title: widget.albumName != null ? Text(widget.albumName) : Text("Unknown Album"),
       ),
       body: ListView.builder(
           itemCount: widget.tracks.length,

@@ -198,9 +198,15 @@ class ShowPlaylistState extends State<ShowPlaylist> {
         body: widget.tracklist.length == 0
             ? Column(
                 mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  Text(
-                      "This playlist is currently empty. Start adding some tracks!"),
+                  Padding(
+                    padding: EdgeInsets.all(12.0),
+                    child: Center(
+                      child: Text(
+                          "This playlist is empty. Start adding some tracks!"),
+                    ),
+                  ),
                   RaisedButton(
                       child: Text("Add Tracks"),
                       onPressed: () {
@@ -273,33 +279,23 @@ class TrackSelection extends StatefulWidget {
 class TrackSelectionState extends State<TrackSelection> {
   List<String> checkedTracks = [];
 
-  getImage(i) {
-    if (audioplayer.allMetaData[i][2] != "") {
-      return Image.memory(
-        audioplayer.allMetaData[i][2],
-        width: MediaQuery.of(context).size.width / 7,
-      );
-    } else {
-      return Image.asset(img, width: MediaQuery.of(context).size.width / 7);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text("Add tracks to playlist"),
         actions: <Widget>[
-          Padding(
-            padding: EdgeInsets.only(right: 10.0),
-            child: InkWell(
+          InkWell(
+            customBorder: CircleBorder(),
+            child: Container(
+              width: 50.0,
               child: Icon(Icons.check),
-              onTap: () {
-                audioplayer.savePlaylist(widget.name, [], checkedTracks);
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (BuildContext) => PlaylistPage()));
-              },
             ),
+            onTap: () {
+              audioplayer.savePlaylist(widget.name, [], checkedTracks);
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (BuildContext) => PlaylistPage()));
+            },
           )
         ],
       ),
@@ -307,7 +303,7 @@ class TrackSelectionState extends State<TrackSelection> {
           shrinkWrap: true,
           itemCount: audioplayer.allFilePaths.length,
           itemBuilder: (BuildContext context, int index) => ListTile(
-                leading: getImage(index),
+                leading: audioplayer.getImage(audioplayer.allMetaData[index][2], context),
                 title: Text(audioplayer.allMetaData[index][0]),
                 subtitle: Text(audioplayer.allMetaData[index][1]),
                 trailing:

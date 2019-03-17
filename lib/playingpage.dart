@@ -59,8 +59,8 @@ class PlayingPageState extends State<PlayingPage> {
     });
     audioplayer.currTrackName = widget.filePath;
     if (widget.fileMetaData[2] != null) {
-      // var imageData = audioplayer.imageMap[widget.fileMetaData[2]];
-      // img = Image.memory(Uint8List.fromList(imageData.cast<int>()), width: 300.0); // mediaquery error
+      var imageData = audioplayer.appPath + "/" + widget.fileMetaData[2];
+      img = Image.asset(imageData, width: 300.0); // mediaquery error
     } else {
       img = Image(image: missingImg,);
     }
@@ -167,25 +167,29 @@ class PlayingPageState extends State<PlayingPage> {
           content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  Expanded(
-                      child: audioplayer.playlistNames != null ?
-                      ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: audioplayer.playlistNames.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            return Card(
-                              child: ListTile(
-                                title: Text(audioplayer.playlistNames[index]),
-                                onTap: () {
-                                  audioplayer.savePlaylist(audioplayer.playlistNames[index], playlistTracks[index], [widget.fileMetaData[0]]);
-                                  Navigator.pop(context);
-                                  key.currentState.showSnackBar(SnackBar(content: Text("Track has been added to playlist")));
-                                },
-                              ),
-                            );
-                          }
+                  audioplayer.playlistNames != null ?
+                      Expanded(
+                          child: ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: audioplayer.playlistNames.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return Container(
+                                  child: ListTile(
+                                    title: Text(audioplayer.playlistNames[index]),
+                                    trailing: Text("${playlistTracks[index].length} Tracks"),
+                                    onTap: () {
+                                      audioplayer.savePlaylist(audioplayer.playlistNames[index], playlistTracks[index], [widget.fileMetaData[0]]);
+                                      Navigator.pop(context);
+                                      key.currentState.showSnackBar(SnackBar(content: Text("Track has been added to playlist")));
+                                    },
+                                  ),
+                                  decoration: BoxDecoration(
+                                    border: Border(bottom: BorderSide(color: Colors.black54))
+                                  )
+                                );
+                              }
+                          )
                       ) : Text("You haven't created any playlists yet."),
-                  )
                 ],
               )
       );
