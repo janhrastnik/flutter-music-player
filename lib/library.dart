@@ -4,6 +4,7 @@ import 'dart:async';
 import 'audioplayer.dart' as audioplayer;
 import 'playingpage.dart';
 import 'package:audioplayer/audioplayer.dart';
+import 'dart:collection';
 
 String img = "images/noimage.png";
 
@@ -151,7 +152,20 @@ class _LibraryState extends State<Library>{
         debugShowCheckedModeBanner: false,
         home: Scaffold(
             drawer: audioplayer.AppDrawer(),
-            appBar: AppBar(title: Text("Library")),
+            appBar: AppBar(
+              title: Text("Library"),
+              actions: <Widget>[
+                IconButton(
+                    icon: Icon(Icons.search),
+                    onPressed: () {
+                      showSearch(
+                          context: context,
+                          delegate: TrackSearch(audioplayer.allMetaData)
+                      );
+                    }
+                )
+              ],
+            ),
             body: Column(
                 children: <Widget>[
                   Expanded(
@@ -189,4 +203,50 @@ class _LibraryState extends State<Library>{
         )
     );
   }
+}
+
+class TrackSearch extends SearchDelegate {
+  final List tracks;
+
+  TrackSearch(this.tracks);
+
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    // TODO: implement buildActions
+    return [
+      IconButton(
+        icon: Icon(Icons.clear),
+        onPressed: () {
+          query = "";
+        },
+      )
+    ];
+  }
+
+  @override
+  Widget buildLeading(BuildContext context) {
+    // TODO: implement buildLeading
+    return IconButton(
+      icon: Icon(Icons.arrow_back),
+      onPressed: () {
+        close(context, null);
+      },
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    // TODO: implement buildResults
+    return Container();
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    // TODO: implement buildSuggestions
+    final results = tracks.where((a) => a[0].toLowerCase().contains(query.toLowerCase()));
+    return ListView(
+      children: results.map<Widget>((a) => Text(a[0])).toList(),
+    );
+  }
+
 }
