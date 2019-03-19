@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'library.dart';
-import 'audioplayer.dart' as audioplayer;
+import 'musicplayer.dart' as musicplayer;
 import 'package:audioplayer/audioplayer.dart';
 import 'favourites.dart';
 import 'playingpage.dart';
@@ -18,24 +18,24 @@ class HomePageState extends State<HomePage> {
   ScrollController _scrollController;
 
   void initAudioPlayer() {
-    audioplayer.audioPlayer = new AudioPlayer();
-    _positionSubscription = audioplayer.audioPlayer.onAudioPositionChanged
-        .listen((p) => setState(() => audioplayer.position = p));
+    musicplayer.audioPlayer = new AudioPlayer();
+    _positionSubscription = musicplayer.audioPlayer.onAudioPositionChanged
+        .listen((p) => setState(() => musicplayer.position = p));
     _audioPlayerStateSubscription =
-        audioplayer.audioPlayer.onPlayerStateChanged.listen((s) {
+        musicplayer.audioPlayer.onPlayerStateChanged.listen((s) {
           if (s == AudioPlayerState.PLAYING) {
             setState(() =>
-            audioplayer.duration = audioplayer.audioPlayer.duration);
+            musicplayer.duration = musicplayer.audioPlayer.duration);
           } else if (s == AudioPlayerState.STOPPED) {
             setState(() {
-              audioplayer.position = audioplayer.duration;
+              musicplayer.position = musicplayer.duration;
             });
           }
         }, onError: (msg) {
           setState(() {
-            // audioplayer.playerState = PlayerState.stopped;
-            audioplayer.duration = new Duration(seconds: 0);
-            audioplayer.position = new Duration(seconds: 0);
+            // musicplayer.playerState = PlayerState.stopped;
+            musicplayer.duration = new Duration(seconds: 0);
+            musicplayer.position = new Duration(seconds: 0);
           });
         });
   }
@@ -44,13 +44,13 @@ class HomePageState extends State<HomePage> {
   void dispose() {
     _positionSubscription.cancel();
     _audioPlayerStateSubscription.cancel();
-    audioplayer.audioPlayer.stop();
+    musicplayer.audioPlayer.stop();
     super.dispose();
   }
 
   scrollQueue() { // scrolls to current track
     try {
-      _scrollController.jumpTo(audioplayer.currTrack * 108.0);
+      _scrollController.jumpTo(musicplayer.currTrack * 108.0);
     } catch(e) {
 
     }
@@ -61,11 +61,11 @@ class HomePageState extends State<HomePage> {
     super.initState();
     _scrollController = ScrollController();
     initAudioPlayer();
-    audioplayer.getFavTrackList().then((l) {
-      audioplayer.favList = l;
+    musicplayer.getFavTrackList().then((l) {
+      musicplayer.favList = l;
     });
-    audioplayer.getPlayListNames().then((l) {
-      audioplayer.playlistNames = l;
+    musicplayer.getPlayListNames().then((l) {
+      musicplayer.playlistNames = l;
     });
     WidgetsBinding.instance.addPostFrameCallback((_) => scrollQueue());
   }
@@ -73,7 +73,7 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: audioplayer.AppDrawer(),
+      drawer: musicplayer.AppDrawer(),
         body: SafeArea(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -92,8 +92,8 @@ class HomePageState extends State<HomePage> {
                     )
                 ),
                 Expanded(
-                    child: audioplayer.queueMetaData != null ? ListView.builder( // play queue
-                      itemCount: audioplayer.queueMetaData.length,
+                    child: musicplayer.queueMetaData != null ? ListView.builder( // play queue
+                      itemCount: musicplayer.queueMetaData.length,
                       controller: _scrollController,
                       scrollDirection: Axis.horizontal,
                       itemBuilder: (BuildContext context, int index) {
@@ -101,14 +101,14 @@ class HomePageState extends State<HomePage> {
                             padding: EdgeInsets.only(bottom: 40.0, top: 10.0),
                             child: Card(
                               child: Material(
-                                  color: index == audioplayer.currTrack ? Colors.limeAccent : Colors.lightBlueAccent,
+                                  color: index == musicplayer.currTrack ? Colors.limeAccent : Colors.lightBlueAccent,
                                   child: InkWell(
                                     child: Column(
                                       children: <Widget>[
-                                        audioplayer.queueMetaData[index][2] != "" ? Padding(
+                                        musicplayer.queueMetaData[index][2] != "" ? Padding(
                                             padding: EdgeInsets.all(8.0),
-                                            child: audioplayer.getImage(
-                                                audioplayer.queueMetaData[index][2],
+                                            child: musicplayer.getImage(
+                                                musicplayer.queueMetaData[index][2],
                                                 context
                                             )
                                         )
@@ -117,7 +117,7 @@ class HomePageState extends State<HomePage> {
                                           padding: EdgeInsets.only(left: 5.0, right: 5.0),
                                           width: 100.0,
                                           child: Center(child: Text(
-                                            audioplayer.queueMetaData[index][0],
+                                            musicplayer.queueMetaData[index][0],
                                             maxLines: 2,
                                             overflow: TextOverflow.ellipsis,
                                           )),
@@ -125,14 +125,14 @@ class HomePageState extends State<HomePage> {
                                       ],
                                     ),
                                     onTap: () {
-                                      audioplayer.currTrack = index;
+                                      musicplayer.currTrack = index;
                                       Navigator.of(context).push(
                                           MaterialPageRoute(
                                               builder: (BuildContext context) => new PlayingPage(
-                                                filePath: audioplayer.queueFileList[index],
-                                                fileMetaData: audioplayer.queueMetaData[index][0] != null ?
-                                                audioplayer.queueMetaData[index] :
-                                                [audioplayer.queueMetaData[index], "unknown"],
+                                                filePath: musicplayer.queueFileList[index],
+                                                fileMetaData: musicplayer.queueMetaData[index][0] != null ?
+                                                musicplayer.queueMetaData[index] :
+                                                [musicplayer.queueMetaData[index], "unknown"],
                                                 backPage: "homePage",
                                               )
                                           )
@@ -173,8 +173,8 @@ class HomePageState extends State<HomePage> {
                             ),),
                             onTap: () {
                               Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => Library(
-                                musicFiles: audioplayer.allFilePaths,
-                                metadata: audioplayer.allMetaData,
+                                musicFiles: musicplayer.allFilePaths,
+                                metadata: musicplayer.allMetaData,
                               ),));
                             },
                           ),

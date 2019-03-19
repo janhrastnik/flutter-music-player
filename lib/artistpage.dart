@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'audioplayer.dart' as audioplayer;
+import 'musicplayer.dart' as musicplayer;
 import 'playingpage.dart';
 
 class ArtistPage extends StatefulWidget {
@@ -13,7 +13,7 @@ class ArtistPageState extends State<ArtistPage> {
 
   @override
   void initState() {
-    for (var track in audioplayer.allMetaData) {
+    for (var track in musicplayer.allMetaData) {
       if (artists.containsKey(track[1]) == false) {
         artists[track[1]] = [track[0]];
       } else {
@@ -32,7 +32,7 @@ class ArtistPageState extends State<ArtistPage> {
       appBar: AppBar(
         title: Text("Artists"),
       ),
-      drawer: audioplayer.AppDrawer(),
+      drawer: musicplayer.AppDrawer(),
       body: ListView.builder(
           itemCount: artists.length,
           itemBuilder: (BuildContext context, int index) => ListTile(
@@ -64,7 +64,7 @@ class ShowArtistAlbumsState extends State<ShowArtistAlbums> {
   @override
   void initState() {
     super.initState();
-    for (var track in audioplayer.allMetaData) {
+    for (var track in musicplayer.allMetaData) {
       if (track[1] == widget.artistName) {
         if (albums.containsKey(track[3]) == false) {
           albums[track[3]] = [[track[0], track[4]]];
@@ -124,15 +124,15 @@ class ShowAlbumState extends State<ShowAlbum> {
     for (var track in widget.tracks) {
       int i;
       String path;
-      for (var x in audioplayer.allMetaData) {
+      for (var x in musicplayer.allMetaData) {
         if (x[0] == track[0]) {
-          i = audioplayer.allMetaData.indexOf(x);
-          path = audioplayer.allFilePaths[i];
+          i = musicplayer.allMetaData.indexOf(x);
+          path = musicplayer.allFilePaths[i];
           albumFilePaths.add(path);
           albumMetaData.add([
-            audioplayer.allMetaData[i][0],
-            audioplayer.allMetaData[i][1],
-            audioplayer.allMetaData[i][2]
+            musicplayer.allMetaData[i][0],
+            musicplayer.allMetaData[i][1],
+            musicplayer.allMetaData[i][2]
           ]);
         }
       }
@@ -170,13 +170,13 @@ class ShowAlbumState extends State<ShowAlbum> {
       body: ListView.builder(
           itemCount: widget.tracks.length,
           itemBuilder: (BuildContext context, int index) => ListTile(
-            leading: audioplayer.getImage(sortedAlbumMetaData[index][2], context),
+            leading: musicplayer.getImage(sortedAlbumMetaData[index][2], context),
             title: Text(sortedAlbumMetaData[index][0].toString()),
             subtitle: Text(sortedAlbumMetaData[index][1].toString()),
             onTap: () {
-              audioplayer.queueFileList = sortedAlbumFilePaths;
-              audioplayer.queueMetaData = sortedAlbumMetaData;
-              audioplayer.currTrack = index;
+              musicplayer.queueFileList = sortedAlbumFilePaths;
+              musicplayer.queueMetaData = sortedAlbumMetaData;
+              musicplayer.currTrack = index;
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (BuildContext context) => PlayingPage(
                       filePath: sortedAlbumFilePaths[index],

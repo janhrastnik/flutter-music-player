@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
-import 'audioplayer.dart' as audioplayer;
+import 'musicplayer.dart' as musicplayer;
 import 'home.dart';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
@@ -82,7 +82,7 @@ class SplashScreenState extends State<SplashScreen> {
 
   void wrap() async {
     path = await _localPath;
-    audioplayer.appPath = path;
+    musicplayer.appPath = path;
     await getFiles();
     await _getAllMetaData();
     for (var i = 0; i < _musicFiles.length; i++) {
@@ -115,8 +115,8 @@ class SplashScreenState extends State<SplashScreen> {
       mapMetaData[_musicFiles[i]] = _metaData[i];
     }
     writeStoredMetaData(mapMetaData);
-    audioplayer.allMetaData = _metaData;
-    audioplayer.allFilePaths = _musicFiles;
+    musicplayer.allMetaData = _metaData;
+    musicplayer.allFilePaths = _musicFiles;
     print(Directory(path).listSync().toString());
     onDoneLoading();
   }
@@ -213,7 +213,11 @@ class SplashScreenState extends State<SplashScreen> {
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.blueAccent),
                     ),
                   ),
-                  Text("Loading track: $loadingTrack"),
+                  Container(
+                    width: 800.0,
+                    height: 100.0,
+                    child: Center(child: Text("Loading track: $loadingTrack"),),
+                  ),
                   LinearProgressIndicator(
                     value: loadingTrackNumber,
                   ),

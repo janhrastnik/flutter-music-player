@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
-import 'audioplayer.dart' as audioplayer;
+import 'musicplayer.dart' as musicplayer;
 import 'playingpage.dart';
 import 'package:audioplayer/audioplayer.dart';
-import 'dart:collection';
 
 String img = "images/noimage.png";
 
@@ -24,14 +23,14 @@ class _LibraryState extends State<Library>{
   static const platform = const MethodChannel('demo.janhrastnik.com/info');
 
   void onComplete() {
-    // setState(() => audioplayer.playerState = PlayerState.stopped);
+    // setState(() => musicplayer.playerState = PlayerState.stopped);
   }
 
   @override
   void dispose() {
     _positionSubscription.cancel();
     _audioPlayerStateSubscription.cancel();
-    audioplayer.audioPlayer.stop();
+    musicplayer.audioPlayer.stop();
     super.dispose();
   }
 
@@ -42,24 +41,24 @@ class _LibraryState extends State<Library>{
   }
 
   void initAudioPlayer() {
-    audioplayer.audioPlayer = new AudioPlayer();
-    _positionSubscription = audioplayer.audioPlayer.onAudioPositionChanged
-        .listen((p) => setState(() => audioplayer.position = p));
+    musicplayer.audioPlayer = new AudioPlayer();
+    _positionSubscription = musicplayer.audioPlayer.onAudioPositionChanged
+        .listen((p) => setState(() => musicplayer.position = p));
     _audioPlayerStateSubscription =
-        audioplayer.audioPlayer.onPlayerStateChanged.listen((s) {
+        musicplayer.audioPlayer.onPlayerStateChanged.listen((s) {
           if (s == AudioPlayerState.PLAYING) {
             setState(() =>
-            audioplayer.duration = audioplayer.audioPlayer.duration);
+            musicplayer.duration = musicplayer.audioPlayer.duration);
           } else if (s == AudioPlayerState.STOPPED) {
             setState(() {
-              audioplayer.position = audioplayer.duration;
+              musicplayer.position = musicplayer.duration;
             });
           }
         }, onError: (msg) {
           setState(() {
-            // audioplayer.playerState = PlayerState.stopped;
-            audioplayer.duration = new Duration(seconds: 0);
-            audioplayer.position = new Duration(seconds: 0);
+            // musicplayer.playerState = PlayerState.stopped;
+            musicplayer.duration = new Duration(seconds: 0);
+            musicplayer.position = new Duration(seconds: 0);
           });
         });
   }
@@ -90,19 +89,19 @@ class _LibraryState extends State<Library>{
                         onTap: () {
                           Navigator.of(context).push(MaterialPageRoute(
                               builder: (BuildContext context) => PlayingPage(
-                                filePath: widget.musicFiles[audioplayer.currTrack],
-                                fileMetaData: widget.metadata[audioplayer.currTrack],
+                                filePath: widget.musicFiles[musicplayer.currTrack],
+                                fileMetaData: widget.metadata[musicplayer.currTrack],
                                 backPage: "libraryPage",
                               )
                           ));
                         },
                         child: Text("${
-                            widget.metadata[audioplayer.currTrack][0] != null
-                                ? widget.metadata[audioplayer.currTrack][0]
-                                : widget.musicFiles[audioplayer.currTrack]
+                            widget.metadata[musicplayer.currTrack][0] != null
+                                ? widget.metadata[musicplayer.currTrack][0]
+                                : widget.musicFiles[musicplayer.currTrack]
                         } by ${
-                            widget.metadata[audioplayer.currTrack][1] != null
-                                ? widget.metadata[audioplayer.currTrack][1]
+                            widget.metadata[musicplayer.currTrack][1] != null
+                                ? widget.metadata[musicplayer.currTrack][1]
                                 : "unknown"
                         }",
                           style: TextStyle(
@@ -121,24 +120,24 @@ class _LibraryState extends State<Library>{
   }
 
   getIcon() {
-    if (audioplayer.playerState == audioplayer.PlayerState.playing) {
+    if (musicplayer.playerState == musicplayer.PlayerState.playing) {
       return InkWell(
             child: Icon(Icons.pause, size: 30.0,),
             onTap: () {
-              audioplayer.pause();
+              musicplayer.pause();
               setState(() {
-                audioplayer.playerState = audioplayer.PlayerState.paused;
+                musicplayer.playerState = musicplayer.PlayerState.paused;
               });
 
             }
         );
-    } else if (audioplayer.playerState == audioplayer.PlayerState.paused) {
+    } else if (musicplayer.playerState == musicplayer.PlayerState.paused) {
       return InkWell(
             child: Icon(Icons.play_arrow, size: 30.0,),
             onTap: () {
-              audioplayer.play(widget.musicFiles[audioplayer.currTrack]);
+              musicplayer.play(widget.musicFiles[musicplayer.currTrack]);
               setState(() {
-                audioplayer.playerState = audioplayer.PlayerState.playing;
+                musicplayer.playerState = musicplayer.PlayerState.playing;
               });
 
             }
@@ -151,7 +150,7 @@ class _LibraryState extends State<Library>{
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
-            drawer: audioplayer.AppDrawer(),
+            drawer: musicplayer.AppDrawer(),
             appBar: AppBar(
               title: Text("Library"),
               actions: <Widget>[
@@ -160,7 +159,7 @@ class _LibraryState extends State<Library>{
                     onPressed: () {
                       showSearch(
                           context: context,
-                          delegate: TrackSearch(audioplayer.allMetaData)
+                          delegate: TrackSearch(musicplayer.allMetaData)
                       );
                     }
                 )
@@ -173,13 +172,13 @@ class _LibraryState extends State<Library>{
                           itemCount: widget.musicFiles.length,
                           itemBuilder: (BuildContext context, int index) {
                             return new ListTile(
-                              leading: audioplayer.getImage(widget.metadata[index][2], context),
+                              leading: musicplayer.getImage(widget.metadata[index][2], context),
                               title: Text(widget.metadata[index][0]),
                               subtitle: Text(widget.metadata[index][1]),
                               onTap: () {
-                                audioplayer.queueFileList = widget.musicFiles;
-                                audioplayer.currTrack = index;
-                                audioplayer.queueMetaData = widget.metadata;
+                                musicplayer.queueFileList = widget.musicFiles;
+                                musicplayer.currTrack = index;
+                                musicplayer.queueMetaData = widget.metadata;
                                 Navigator.of(context).push(
                                     MaterialPageRoute(
                                         builder: (BuildContext context) => new PlayingPage(
@@ -196,7 +195,7 @@ class _LibraryState extends State<Library>{
                           }
                       )
                   ),
-        (audioplayer.playerState == audioplayer.PlayerState.playing || audioplayer.playerState == audioplayer.PlayerState.paused)
+        (musicplayer.playerState == musicplayer.PlayerState.playing || musicplayer.playerState == musicplayer.PlayerState.paused)
             ? PlayerInfo() : Container(child: null,)
                 ]
             )
@@ -236,17 +235,54 @@ class TrackSearch extends SearchDelegate {
 
   @override
   Widget buildResults(BuildContext context) {
+    final results = tracks.where((track) => track[0].toLowerCase().contains(query.toLowerCase()));
     // TODO: implement buildResults
-    return Container();
+    return ListView(
+        children: results.map<Widget>((track) => ListTile(
+          leading: musicplayer.getImage(track[2], context),
+          title: Text(track[0]),
+          subtitle: Text(track[1]),
+          onTap: () {
+            musicplayer.queueFileList = [musicplayer.allFilePaths[tracks.indexOf(track)]];
+            musicplayer.currTrack = 0;
+            musicplayer.queueMetaData = [track];
+            Navigator.of(context).push(
+                MaterialPageRoute(
+                    builder: (BuildContext context) => new PlayingPage(
+                      filePath: musicplayer.allFilePaths[tracks.indexOf(track)],
+                      fileMetaData: track,
+                    )
+                )
+            );
+          },
+        ),
+        ).toList());
   }
 
   @override
   Widget buildSuggestions(BuildContext context) {
     // TODO: implement buildSuggestions
-    final results = tracks.where((a) => a[0].toLowerCase().contains(query.toLowerCase()));
+    final results = tracks.where((track) => track[0].toLowerCase().contains(query.toLowerCase()));
     return ListView(
-      children: results.map<Widget>((a) => Text(a[0])).toList(),
-    );
+      children: results.map<Widget>((track) => ListTile(
+        leading: musicplayer.getImage(track[2], context),
+        title: Text(track[0]),
+        subtitle: Text(track[1]),
+        onTap: () {
+          musicplayer.queueFileList = [musicplayer.allFilePaths[tracks.indexOf(track)]];
+          musicplayer.currTrack = 0;
+          musicplayer.queueMetaData = [track];
+          Navigator.of(context).push(
+              MaterialPageRoute(
+                  builder: (BuildContext context) => new PlayingPage(
+                    filePath: musicplayer.allFilePaths[tracks.indexOf(track)],
+                    fileMetaData: track,
+                  )
+              )
+          );
+        },
+    ),
+    ).toList());
   }
 
 }

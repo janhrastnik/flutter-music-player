@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'audioplayer.dart' as audioplayer;
+import 'musicplayer.dart' as musicplayer;
 import 'playingpage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -45,16 +45,16 @@ class PlaylistPageState extends State<PlaylistPage> {
                   setState(() {
                     controller.text = "";
                   });
-                  audioplayer.savePlaylist(
+                  musicplayer.savePlaylist(
                       _name, [], null); // saves playlist to shared preferences
-                  if (audioplayer.playlistNames != null) {
-                    savePlaylistNames(_name, audioplayer.playlistNames);
+                  if (musicplayer.playlistNames != null) {
+                    savePlaylistNames(_name, musicplayer.playlistNames);
                   } else {
                     List<String> lst = [];
                     savePlaylistNames(_name, lst);
                   }
-                  audioplayer.getPlayListNames().then((l) {
-                    audioplayer.playlistNames = l;
+                  musicplayer.getPlayListNames().then((l) {
+                    musicplayer.playlistNames = l;
                   });
                   Navigator.of(context, rootNavigator: true).pop('dialog');
                   Navigator.of(context).push(MaterialPageRoute(
@@ -73,9 +73,9 @@ class PlaylistPageState extends State<PlaylistPage> {
   @override
   void initState() {
     super.initState();
-    // print("playlist names are " + audioplayer.playlistNames.toString());
-    audioplayer.loadPlaylistData();
-    print(audioplayer.playlistNames);
+    // print("playlist names are " + musicplayer.playlistNames.toString());
+    musicplayer.loadPlaylistData();
+    print(musicplayer.playlistNames);
   }
 
   @override
@@ -95,9 +95,9 @@ class PlaylistPageState extends State<PlaylistPage> {
         appBar: AppBar(
           title: Text("Playlists"),
         ),
-        drawer: audioplayer.AppDrawer(),
-        body: audioplayer.playlistNames != null ? FutureBuilder(
-          future: audioplayer.loadPlaylistData(),
+        drawer: musicplayer.AppDrawer(),
+        body: musicplayer.playlistNames != null ? FutureBuilder(
+          future: musicplayer.loadPlaylistData(),
           builder: (BuildContext context, AsyncSnapshot snapshot) {
             try {
               var data = Map();
@@ -109,7 +109,7 @@ class PlaylistPageState extends State<PlaylistPage> {
               } else {
                 for (var i in List<int>.generate(
                     tempData.length, (n) => n + 1)) {
-                  data[audioplayer.playlistNames[i - 1]] =
+                  data[musicplayer.playlistNames[i - 1]] =
                       tempData[i - 1];
                 }
                 return Column(
@@ -120,14 +120,14 @@ class PlaylistPageState extends State<PlaylistPage> {
                         itemCount: data.length,
                         itemBuilder: (BuildContext context, int index) {
                           final playlistName =
-                              audioplayer.playlistNames[index];
+                              musicplayer.playlistNames[index];
                           return Dismissible(
-                            key: Key(audioplayer.playlistNames[index]),
+                            key: Key(musicplayer.playlistNames[index]),
                             onDismissed: (direction) {
-                              audioplayer.playlistNames.remove(playlistName);
-                              savePlaylistNames(null, audioplayer.playlistNames);
+                              musicplayer.playlistNames.remove(playlistName);
+                              savePlaylistNames(null, musicplayer.playlistNames);
                               data.remove(playlistName);
-                              print(audioplayer.playlistNames);
+                              print(musicplayer.playlistNames);
                             },
                             child: ListTile(
                               title: Text(playlistName),
@@ -174,15 +174,15 @@ class ShowPlaylistState extends State<ShowPlaylist> {
     for (var track in widget.tracklist) {
       int i;
       String path;
-      for (var x in audioplayer.allMetaData) {
+      for (var x in musicplayer.allMetaData) {
         if (x[0] == track) {
-          i = audioplayer.allMetaData.indexOf(x);
-          path = audioplayer.allFilePaths[i];
+          i = musicplayer.allMetaData.indexOf(x);
+          path = musicplayer.allFilePaths[i];
           playlistFilePaths.add(path);
           playlistMetaData.add([
-            audioplayer.allMetaData[i][0],
-            audioplayer.allMetaData[i][1],
-            audioplayer.allMetaData[i][2]
+            musicplayer.allMetaData[i][0],
+            musicplayer.allMetaData[i][1],
+            musicplayer.allMetaData[i][2]
           ]);
         }
       }
@@ -238,22 +238,22 @@ class ShowPlaylistState extends State<ShowPlaylist> {
                         setState(() {
                           playlistMetaData.removeAt(index);
                           widget.tracklist.removeAt(index);
-                          audioplayer.savePlaylist(
+                          musicplayer.savePlaylist(
                               widget.name, widget.tracklist, null);
                           Scaffold.of(context).showSnackBar(
                               SnackBar(content: Text("Track removed.")));
                         });
                       },
                       child: ListTile(
-                        leading: audioplayer.getImage(playlistMetaData[index][2], context),
+                        leading: musicplayer.getImage(playlistMetaData[index][2], context),
                         title: Text(playlistMetaData[index][0]),
                         subtitle: Text(playlistMetaData[index][1]),
                         trailing: Text((index + 1).toString()),
                         onTap: () {
                           // TRACK GETS PLAYED, PLAYLIST FILEPATHS AND METADATA GET ADDED TO PLAYQUEUE
-                          audioplayer.queueFileList = playlistFilePaths;
-                          audioplayer.queueMetaData = playlistMetaData;
-                          audioplayer.currTrack = index;
+                          musicplayer.queueFileList = playlistFilePaths;
+                          musicplayer.queueMetaData = playlistMetaData;
+                          musicplayer.currTrack = index;
                           Navigator.of(context).push(MaterialPageRoute(
                               builder: (BuildContext context) => PlayingPage(
                                   filePath: playlistFilePaths[index],
@@ -292,7 +292,7 @@ class TrackSelectionState extends State<TrackSelection> {
               child: Icon(Icons.check),
             ),
             onTap: () {
-              audioplayer.savePlaylist(widget.name, [], checkedTracks);
+              musicplayer.savePlaylist(widget.name, [], checkedTracks);
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (BuildContext) => PlaylistPage()));
             },
@@ -301,24 +301,24 @@ class TrackSelectionState extends State<TrackSelection> {
       ),
       body: ListView.builder(
           shrinkWrap: true,
-          itemCount: audioplayer.allFilePaths.length,
+          itemCount: musicplayer.allFilePaths.length,
           itemBuilder: (BuildContext context, int index) => ListTile(
-                leading: audioplayer.getImage(audioplayer.allMetaData[index][2], context),
-                title: Text(audioplayer.allMetaData[index][0]),
-                subtitle: Text(audioplayer.allMetaData[index][1]),
+                leading: musicplayer.getImage(musicplayer.allMetaData[index][2], context),
+                title: Text(musicplayer.allMetaData[index][0]),
+                subtitle: Text(musicplayer.allMetaData[index][1]),
                 trailing:
-                    checkedTracks.contains(audioplayer.allMetaData[index][0]) ==
+                    checkedTracks.contains(musicplayer.allMetaData[index][0]) ==
                             true
                         ? Icon(Icons.check_box)
                         : Icon(Icons.check_box_outline_blank),
                 onTap: () {
                   setState(() {
                     if (checkedTracks
-                            .contains(audioplayer.allMetaData[index][0]) ==
+                            .contains(musicplayer.allMetaData[index][0]) ==
                         true) {
-                      checkedTracks.remove(audioplayer.allMetaData[index][0]);
+                      checkedTracks.remove(musicplayer.allMetaData[index][0]);
                     } else {
-                      checkedTracks.add(audioplayer.allMetaData[index][0]);
+                      checkedTracks.add(musicplayer.allMetaData[index][0]);
                     }
                   });
                 },

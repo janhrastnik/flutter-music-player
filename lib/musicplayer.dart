@@ -1,4 +1,4 @@
-library musicplayer2.audioplayer;
+library musicplayer2.musicplayer;
 import 'package:audioplayer/audioplayer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +8,7 @@ import 'favourites.dart';
 import 'library.dart';
 import 'package:random_color/random_color.dart';
 import 'artistpage.dart';
-import 'dart:typed_data';
+import 'package:flutter/services.dart';
 String img = "images/noimage.png";
 // for playlists, play queue
 List queueFileList;
@@ -26,12 +26,17 @@ List<String> playlistNames;
 
 RandomColor randomColor = RandomColor();
 String appPath;
+bool onPlayingPage = false;
 
 enum PlayerState { stopped, playing, paused }
 AudioPlayer audioPlayer;
 PlayerState playerState;
 Duration duration;
 Duration position;
+
+void hideAppBar() {
+  SystemChrome.setEnabledSystemUIOverlays([]);
+}
 
 Future clearPrefs() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -116,6 +121,7 @@ class AppDrawer extends StatelessWidget {
               title: Text("Home"),
             ),
             onTap: () {
+              onPlayingPage = false;
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (BuildContext context) => HomePage()
               )
@@ -127,6 +133,7 @@ class AppDrawer extends StatelessWidget {
               title: Text("Library"),
             ),
             onTap: () {
+              onPlayingPage = false;
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (BuildContext context) => Library(
                     musicFiles: allFilePaths,
@@ -141,6 +148,7 @@ class AppDrawer extends StatelessWidget {
               title: Text("Favourites"),
             ),
             onTap: () {
+              onPlayingPage = false;
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (BuildContext context) => FavouritesPage()
               )
@@ -152,6 +160,7 @@ class AppDrawer extends StatelessWidget {
               title: Text("Playlists"),
             ),
             onTap: () {
+              onPlayingPage = false;
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (BuildContext context) => PlaylistPage(
                   )
@@ -164,6 +173,7 @@ class AppDrawer extends StatelessWidget {
               title: Text("Artists"),
             ),
             onTap: () {
+              onPlayingPage = false;
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (BuildContext context) => ArtistPage(
                   )

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'audioplayer.dart' as audioplayer;
+import 'musicplayer.dart' as musicplayer;
 import 'playingpage.dart';
 
 String img = "images/noimage.png";
@@ -14,10 +14,10 @@ class FavouritesPageState extends State<FavouritesPage>{
   @override
   void initState() {
     super.initState();
-    if (audioplayer.favList != null) {
-      print("favlist is " + audioplayer.favList.toString());
-      for (var track in audioplayer.favList) {
-        favListMetaData.add(audioplayer.allMetaData[audioplayer.allFilePaths.indexOf(track)]);
+    if (musicplayer.favList != null) {
+      print("favlist is " + musicplayer.favList.toString());
+      for (var track in musicplayer.favList) {
+        favListMetaData.add(musicplayer.allMetaData[musicplayer.allFilePaths.indexOf(track)]);
       }
     } else {
 
@@ -27,30 +27,30 @@ class FavouritesPageState extends State<FavouritesPage>{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: audioplayer.AppDrawer(),
+      drawer: musicplayer.AppDrawer(),
       appBar: AppBar(
         title: Text("Favourites"),
         ),
-      body: audioplayer.favList != null ?
+      body: musicplayer.favList != null ?
       ListView.builder(
-      itemCount: audioplayer.favList.length,
+      itemCount: musicplayer.favList.length,
       itemBuilder: (BuildContext context, int index) {
         var track_metadata = favListMetaData[index];
         return ListTile(
-          leading: audioplayer.getImage(track_metadata[2], context),
+          leading: musicplayer.getImage(track_metadata[2], context),
           title: Text(track_metadata[0]),
           subtitle: Text(track_metadata[1]),
           onTap: () {
-            audioplayer.queueFileList = audioplayer.favList;
-            audioplayer.queueMetaData = favListMetaData;
-            audioplayer.currTrack = index;
+            musicplayer.queueFileList = musicplayer.favList;
+            musicplayer.queueMetaData = favListMetaData;
+            musicplayer.currTrack = index;
             Navigator.of(context).push(
                 MaterialPageRoute(
                     builder: (BuildContext context) => new PlayingPage(
-                      filePath: audioplayer.favList[index],
+                      filePath: musicplayer.favList[index],
                       fileMetaData: track_metadata[0] != null ?
                       track_metadata :
-                      [audioplayer.favList[index], "unknown"] ,
+                      [musicplayer.favList[index], "unknown"] ,
                       backPage: "favouritesPage",
                     )
                 )
