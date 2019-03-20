@@ -188,6 +188,7 @@ class SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
+    musicplayer.setOrientation();
     readStoredMetaData().then((data) {
       if (data != 0) {
         mapMetaData = data;

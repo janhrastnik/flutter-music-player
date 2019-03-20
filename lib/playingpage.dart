@@ -80,6 +80,7 @@ class PlayingPageState extends State<PlayingPage> {
         .listen((p) => setState(() => musicplayer.position = p));
     _audioPlayerStateSubscription =
         musicplayer.audioPlayer.onPlayerStateChanged.listen((s) {
+          musicplayer.hideAppBarAgain();
           if (s == AudioPlayerState.PLAYING) {
             setState(() =>
             musicplayer.duration = musicplayer.audioPlayer.duration);
@@ -155,36 +156,30 @@ class PlayingPageState extends State<PlayingPage> {
 
   getIcon() {
     if (isPlaying == true || musicplayer.playerState == musicplayer.PlayerState.stopped) {
-      return Padding(
-        child: IconButton(
-            icon: Icon(Icons.pause),
-            iconSize: 50.0,
-            tooltip: "Pause Track",
-            onPressed: () {
-              musicplayer.pause();
-              setState(() {
-                musicplayer.playerState = musicplayer.PlayerState.paused;
-              });
+      return IconButton(
+          icon: Icon(Icons.pause),
+          iconSize: 50.0,
+          tooltip: "Pause Track",
+          onPressed: () {
+            musicplayer.pause();
+            setState(() {
+              musicplayer.playerState = musicplayer.PlayerState.paused;
+            });
 
-            }
-        ),
-        padding: EdgeInsets.only(top: 20.0),
+          }
       );
     } else if (isPlaying == false) {
-      return Padding(
-        child: IconButton(
-            icon: Icon(Icons.play_arrow),
-            iconSize: 50.0,
-            tooltip: "Play Track",
-            onPressed: () {
-              musicplayer.play(widget.filePath);
-              setState(() {
-                musicplayer.playerState = musicplayer.PlayerState.playing;
-              });
+      return IconButton(
+          icon: Icon(Icons.play_arrow),
+          iconSize: 50.0,
+          tooltip: "Play Track",
+          onPressed: () {
+            musicplayer.play(widget.filePath);
+            setState(() {
+              musicplayer.playerState = musicplayer.PlayerState.playing;
+            });
 
-            }
-        ),
-        padding: EdgeInsets.only(top: 20.0),
+          }
       );
     }
   }
@@ -233,11 +228,10 @@ class PlayingPageState extends State<PlayingPage> {
     return Scaffold(
         key: key,
         drawer: musicplayer.AppDrawer(),
-        backgroundColor: pageColor,
         appBar: AppBar(
-          leading: InkWell(
-            child: Icon(Icons.arrow_back),
-            onTap: () {
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
               if (widget.backPage == "libraryPage") {
                 Navigator.of(context).push(MaterialPageRoute(
                     builder: (BuildContext context) =>
@@ -302,32 +296,40 @@ class PlayingPageState extends State<PlayingPage> {
               color: Colors.black54
           ),
         ),
-        body: SingleChildScrollView(
-          child: Material(
-            shadowColor: Colors.black54,
-            elevation: 20.0,
-            color: pageColor,
-            child: Column(
-              children: <Widget>[
-                Container(
-                  color: Colors.white,
-                    child: img,
-                    padding: EdgeInsets.only(
-                      left: MediaQuery.of(context).size.width/6,
-                      right: MediaQuery.of(context).size.width/6,
-                    )
-                ),
-                Container(
-                  color: Colors.white,
-                  padding: EdgeInsets.only(bottom: MediaQuery.of(context).size.width/6,),
-                  child: null,
-                ),
-                Column(
+        body: Material(
+          color: pageColor,
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Column( // IMAGE PORTION OF PLAYINGPAGE
+                children: <Widget>[
+                  Container(
+                      color: Colors.white,
+                      child: img,
+                      padding: EdgeInsets.only(
+                        left: MediaQuery.of(context).size.width/6,
+                        right: MediaQuery.of(context).size.width/6,
+                      )
+                  ),
+                  Container(
+                    color: Colors.white,
+                    padding: EdgeInsets.only(bottom: MediaQuery.of(context).size.width/6,),
+                    child: null,
+                  ),
+                ],
+              ),
+              Expanded(
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: <Widget>[
-                      Padding( // TRACK NAME
-                        padding: EdgeInsets.only(left: 30.0, right: 30.0, top: 16.0),
-                        child: Tooltip(
-                          message: widget.fileMetaData[0],
+                      Tooltip(
+                        message: widget.fileMetaData[0],
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                            left: MediaQuery.of(context).size.width/20,
+                            right: MediaQuery.of(context).size.width/20
+                          ),
                           child: Text(
                             widget.fileMetaData[0],
                             style: TextStyle(fontSize: 24.0),
@@ -337,112 +339,107 @@ class PlayingPageState extends State<PlayingPage> {
                           ),
                         ),
                       ),
-                      Padding( // ARTIST
-                        padding: EdgeInsets.only(top: 5.0),
-                        child: Text(
-                          widget.fileMetaData[1],
-                          style: TextStyle(fontSize: 18.0, color: Colors.black54),
-                          overflow: TextOverflow.fade,
-                          maxLines: 1,
-                          softWrap: false,
-                        ),
+                      Text(
+                        widget.fileMetaData[1],
+                        style: TextStyle(fontSize: 18.0, color: Colors.black54),
+                        overflow: TextOverflow.fade,
+                        maxLines: 1,
+                        softWrap: false,
                       ),
                       Row( // BUTTONS
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
-                          Padding(
-                            padding: EdgeInsets.only(top: 20.0),
-                            child: IconButton(
-                              icon: Icon(Icons.skip_previous, color: Colors.blueGrey,),
-                              iconSize: 30.0,
-                              tooltip: "Previous Track",
-                              onPressed: () {
-                                if (musicplayer.currTrack != 0) {
-                                  musicplayer.currTrack--;
-                                  Navigator.of(context).push(MaterialPageRoute(
-                                      builder: (BuildContext context) => PlayingPage(
-                                        filePath: musicplayer.queueFileList[musicplayer.currTrack],
-                                        fileMetaData: musicplayer.queueMetaData[musicplayer.currTrack][0] != null
-                                            ? musicplayer.queueMetaData[musicplayer.currTrack] : [musicplayer.queueFileList[musicplayer.currTrack], "unknown"],
-                                        backPage: widget.backPage,
-                                      )
-                                  )
-                                  );
-                                }
-                              },
-                            ),
+                          IconButton(
+                            icon: Icon(Icons.skip_previous, color: Colors.blueGrey,),
+                            iconSize: 30.0,
+                            tooltip: "Previous Track",
+                            onPressed: () {
+                              if (musicplayer.currTrack != 0) {
+                                musicplayer.currTrack--;
+                                Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (BuildContext context) => PlayingPage(
+                                      filePath: musicplayer.queueFileList[musicplayer.currTrack],
+                                      fileMetaData: musicplayer.queueMetaData[musicplayer.currTrack][0] != null
+                                          ? musicplayer.queueMetaData[musicplayer.currTrack] : [musicplayer.queueFileList[musicplayer.currTrack], "unknown"],
+                                      backPage: widget.backPage,
+                                    )
+                                )
+                                );
+                              }
+                            },
                           ),
-                          Padding(
-                            padding: EdgeInsets.only(top: 20.0),
-                            child: IconButton(
-                              icon: Icon(Icons.history),
-                              iconSize: 50.0,
-                              tooltip: "Replay Track",
-                              onPressed: () {
-                                setState(() {
-                                  musicplayer.audioPlayer.seek(0.0);
-                                  musicplayer.play(widget.filePath);
-                                  musicplayer.playerState = musicplayer.PlayerState.playing;
-                                });
-                              },
-                            ),
+                          IconButton(
+                            icon: Icon(Icons.history),
+                            iconSize: 50.0,
+                            tooltip: "Replay Track",
+                            onPressed: () {
+                              setState(() {
+                                musicplayer.audioPlayer.seek(0.0);
+                                musicplayer.play(widget.filePath);
+                                musicplayer.playerState = musicplayer.PlayerState.playing;
+                              });
+                            },
                           ),
                           getIcon(), // PLAY BUTTON / PAUSE BUTTON
-                          Padding(
-                            padding: EdgeInsets.only(top: 20.0),
-                            child: IconButton(
-                              icon: Icon(Icons.skip_next, color: Colors.blueGrey,),
-                              iconSize: 30.0,
-                              tooltip: "Next Track",
-                              onPressed: () {
-                                if (musicplayer.currTrack != musicplayer.queueFileList.length-1) {
-                                  musicplayer.currTrack++;
-                                  Navigator.of(context).push(MaterialPageRoute(
-                                      builder: (BuildContext context) => PlayingPage(
-                                        filePath: musicplayer.queueFileList[musicplayer.currTrack],
-                                        fileMetaData: musicplayer.queueMetaData[musicplayer.currTrack][0] != null
-                                            ? musicplayer.queueMetaData[musicplayer.currTrack] : [musicplayer.queueFileList[musicplayer.currTrack], "unknown"],
-                                        backPage: widget.backPage,
-                                      )
-                                  )
-                                  );
-                                }
-                              },
-                            ),
+                          IconButton(
+                            icon: Icon(Icons.skip_next, color: Colors.blueGrey,),
+                            iconSize: 30.0,
+                            tooltip: "Next Track",
+                            onPressed: () {
+                              if (musicplayer.currTrack != musicplayer.queueFileList.length-1) {
+                                musicplayer.currTrack++;
+                                Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (BuildContext context) => PlayingPage(
+                                      filePath: musicplayer.queueFileList[musicplayer.currTrack],
+                                      fileMetaData: musicplayer.queueMetaData[musicplayer.currTrack][0] != null
+                                          ? musicplayer.queueMetaData[musicplayer.currTrack] : [musicplayer.queueFileList[musicplayer.currTrack], "unknown"],
+                                      backPage: widget.backPage,
+                                    )
+                                )
+                                );
+                              }
+                            },
                           ),
                         ],
                       ),
-                      musicplayer.duration == null
-                          ? Container()
-                          : Padding(
-                            padding: EdgeInsets.only(top: 40.0),
-                            child: Slider(
-                            value: musicplayer.position?.inMilliseconds?.toDouble() ?? 0.0,
-                            onChanged: (double value) {
-                              musicplayer.play(widget.filePath);
-                              musicplayer.playerState = musicplayer.PlayerState.playing;
-                              musicplayer.audioPlayer.seek((value / 1000).roundToDouble());
-                            },
-                            min: 0.0,
-                            max: musicplayer.duration.inMilliseconds.toDouble()),
-                          ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: <Widget>[
-                          Padding(
-                            padding: EdgeInsets.only(left: 14.0),
-                            child: Text(positionText, style: TextStyle(fontSize: 24.0)),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(right: 14.0),
-                            child: Text(durationText, style: TextStyle(fontSize: 24.0)),
+                          musicplayer.duration == null
+                              ? Container()
+                              : Slider(
+                              value: musicplayer.position?.inMilliseconds?.toDouble() ?? 0.0,
+                              onChanged: (double value) {
+                                musicplayer.play(widget.filePath);
+                                musicplayer.playerState = musicplayer.PlayerState.playing;
+                                musicplayer.audioPlayer.seek((value / 1000).roundToDouble());
+                              },
+                              min: 0.0,
+                              max: musicplayer.duration.inMilliseconds.toDouble()),
+                          Wrap(
+                            direction: Axis.horizontal,
+                            children: <Widget>[
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: <Widget>[
+                                  Padding(
+                                    padding: EdgeInsets.only(left: 14.0),
+                                    child: Text(positionText, style: TextStyle(fontSize: 24.0)),
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.only(right: 14.0),
+                                    child: Text(durationText, style: TextStyle(fontSize: 24.0)),
+                                  )
+                                ],
+                              ),
+                            ],
                           )
                         ],
                       ),
                     ],
                   ),
-              ],
-            ),
+              ),
+            ],
           ),
         )
     );

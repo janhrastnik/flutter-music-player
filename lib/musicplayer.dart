@@ -38,6 +38,14 @@ void hideAppBar() {
   SystemChrome.setEnabledSystemUIOverlays([]);
 }
 
+void hideAppBarAgain() {
+  SystemChrome.restoreSystemUIOverlays();
+}
+
+void setOrientation() {
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+}
+
 Future clearPrefs() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   prefs.clear();
@@ -56,10 +64,8 @@ Future getPlayListNames() async {
 }
 
 Future getPlayList(name) async {
-  // print("getting playlist " + name.toString());
   SharedPreferences prefs = await SharedPreferences.getInstance();
   List<String> playList = prefs.getStringList(name);
-  // print("playlist contains " + playList.toString());
   return playList;
 }
 
@@ -68,7 +74,6 @@ Future<List> loadPlaylistData() async {
   if (playlistNames != null) {
     for (String name in playlistNames) { // we get tracks from all playlists from shared preferences
       getPlayList(name).then((l) {
-        // print("l is " + l.toString());
         playlistTracks.add(l);
       });
     }
@@ -78,14 +83,11 @@ Future<List> loadPlaylistData() async {
 
 void savePlaylist(String name, List<String> CurrTrackList, List<String> trackList) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  // print("playlist name is " + name.toString());
   if (trackList != null) {
-    // print("tracklist is " + trackList.toString());
     for (var track in trackList) {
       CurrTrackList.add(track);
     }
   }
-  // print("final tracklist is " + CurrTrackList.toString());
   prefs.setStringList(name, CurrTrackList);
 }
 
@@ -118,6 +120,7 @@ class AppDrawer extends StatelessWidget {
         children: <Widget>[
           InkWell(
             child: ListTile(
+              leading: Icon(Icons.home),
               title: Text("Home"),
             ),
             onTap: () {
@@ -130,6 +133,7 @@ class AppDrawer extends StatelessWidget {
           ),
           InkWell(
             child: ListTile(
+              leading: Icon(Icons.library_music),
               title: Text("Library"),
             ),
             onTap: () {
@@ -145,6 +149,7 @@ class AppDrawer extends StatelessWidget {
           ),
           InkWell(
             child: ListTile(
+              leading: Icon(Icons.favorite_border),
               title: Text("Favourites"),
             ),
             onTap: () {
@@ -157,6 +162,7 @@ class AppDrawer extends StatelessWidget {
           ),
           InkWell(
             child: ListTile(
+              leading: Icon(Icons.list),
               title: Text("Playlists"),
             ),
             onTap: () {
@@ -170,6 +176,7 @@ class AppDrawer extends StatelessWidget {
           ),
           InkWell(
             child: ListTile(
+              leading: Icon(Icons.account_circle),
               title: Text("Artists"),
             ),
             onTap: () {

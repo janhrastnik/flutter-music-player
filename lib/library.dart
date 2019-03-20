@@ -63,11 +63,10 @@ class _LibraryState extends State<Library>{
         });
   }
 
-  PlayerInfo() {
-    return
-        Container(
+  playerInfo() {
+    return Container(
             decoration: BoxDecoration(
-                color: Colors.white,
+              color: Colors.white,
                 boxShadow: [BoxShadow(
                 offset: Offset(5.0, 5.0),
                 spreadRadius: 5.0,
@@ -75,46 +74,51 @@ class _LibraryState extends State<Library>{
                 color: Colors.grey
               )]
             ),
-            padding: EdgeInsets.all(20.0),
-              child: Column(
-                children: <Widget>[
-                  Row(children: <Widget>[
-                    Text("Now playing: ",
-                      style: TextStyle(
-                          color: Colors.blueGrey
-                      ),
-                    ),
-                    Expanded(
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (BuildContext context) => PlayingPage(
-                                filePath: widget.musicFiles[musicplayer.currTrack],
-                                fileMetaData: widget.metadata[musicplayer.currTrack],
-                                backPage: "libraryPage",
-                              )
-                          ));
-                        },
-                        child: Text("${
-                            widget.metadata[musicplayer.currTrack][0] != null
-                                ? widget.metadata[musicplayer.currTrack][0]
-                                : widget.musicFiles[musicplayer.currTrack]
-                        } by ${
-                            widget.metadata[musicplayer.currTrack][1] != null
-                                ? widget.metadata[musicplayer.currTrack][1]
-                                : "unknown"
-                        }",
-                          style: TextStyle(
-                              fontSize: 12.0
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (BuildContext context) => PlayingPage(
+                        filePath: widget.musicFiles[musicplayer.currTrack],
+                        fileMetaData: widget.metadata[musicplayer.currTrack],
+                        backPage: "libraryPage",
+                      )
+                    ));
+                    },
+                  child: Padding(
+                    padding: EdgeInsets.all(20.0),
+                    child: Column(
+                      children: <Widget>[
+                        Row(children: <Widget>[
+                          Text("Now playing: ",
+                            style: TextStyle(
+                                color: Colors.blueGrey
+                            ),
                           ),
+                          Expanded(
+                            child: Text("${
+                                  widget.metadata[musicplayer.currTrack][0] != null
+                                      ? widget.metadata[musicplayer.currTrack][0]
+                                      : widget.musicFiles[musicplayer.currTrack]
+                              } by ${
+                                  widget.metadata[musicplayer.currTrack][1] != null
+                                      ? widget.metadata[musicplayer.currTrack][1]
+                                      : "unknown"
+                              }",
+                                style: TextStyle(
+                                    fontSize: 12.0
+                                ),
+                              ),
+                            ),
+                          getIcon()
+                        ],
                         ),
-                      ),
-                    ),
-                    getIcon()
-                  ],
-                  ),
 
-                ],
+                      ],
+                    ),
+                  ),
+                ),
               ),
       );
   }
@@ -196,7 +200,7 @@ class _LibraryState extends State<Library>{
                       )
                   ),
         (musicplayer.playerState == musicplayer.PlayerState.playing || musicplayer.playerState == musicplayer.PlayerState.paused)
-            ? PlayerInfo() : Container(child: null,)
+            ? playerInfo() : Container(child: null,)
                 ]
             )
         )
@@ -251,6 +255,7 @@ class TrackSearch extends SearchDelegate {
                     builder: (BuildContext context) => new PlayingPage(
                       filePath: musicplayer.allFilePaths[tracks.indexOf(track)],
                       fileMetaData: track,
+                      backPage: "libraryPage",
                     )
                 )
             );
@@ -277,6 +282,7 @@ class TrackSearch extends SearchDelegate {
                   builder: (BuildContext context) => new PlayingPage(
                     filePath: musicplayer.allFilePaths[tracks.indexOf(track)],
                     fileMetaData: track,
+                    backPage: "libraryPage",
                   )
               )
           );
