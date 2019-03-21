@@ -133,12 +133,16 @@ class SplashScreenState extends State<SplashScreen> {
               _musicFiles.add(fileOrDir.path);
             }
           } // tries to find external sd card
-            var extSdDir = Directory('/mnt/m_external_sd/download');
-            List sdContents = extSdDir.listSync(recursive: true);
-            for (var fileOrDir in sdContents) {
-              if (fileOrDir.path.toString().endsWith(".mp3")) {
-                _musicFiles.add(fileOrDir.path);
+            try {
+              var extSdDir = Directory('/mnt/m_external_sd/download');
+              List sdContents = extSdDir.listSync(recursive: true);
+              for (var fileOrDir in sdContents) {
+                if (fileOrDir.path.toString().endsWith(".mp3")) {
+                  _musicFiles.add(fileOrDir.path);
+                }
               }
+            } catch(e) {
+
             }
         } else {
         }
@@ -208,6 +212,7 @@ class SplashScreenState extends State<SplashScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
+                  Image.asset("images/nanoicon256.png"),
                   Padding(
                     padding: EdgeInsets.all(10.0),
                     child: CircularProgressIndicator(

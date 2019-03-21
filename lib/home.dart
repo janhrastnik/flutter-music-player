@@ -91,8 +91,8 @@ class HomePageState extends State<HomePage> {
                       ],
                     )
                 ),
-                Expanded(
-                    child: musicplayer.queueMetaData != null ? ListView.builder( // play queue
+                Flexible(
+                    child: musicplayer.queueMetaData != null ? ListView.builder(// play queue
                       itemCount: musicplayer.queueMetaData.length,
                       controller: _scrollController,
                       scrollDirection: Axis.horizontal,

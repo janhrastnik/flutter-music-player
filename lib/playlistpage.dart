@@ -123,6 +123,18 @@ class PlaylistPageState extends State<PlaylistPage> {
                               musicplayer.playlistNames[index];
                           return Dismissible(
                             key: Key(musicplayer.playlistNames[index]),
+                            background: Container(
+                            padding: EdgeInsets.only(left: 10.0),
+                            color: Colors.red,
+                            alignment: Alignment.centerLeft,
+                            child: Icon(Icons.delete),
+                            ),
+                            secondaryBackground: Container(
+                            padding: EdgeInsets.only(right: 10.0),
+                            color: Colors.red,
+                            alignment: Alignment.centerRight,
+                            child: Icon(Icons.delete),
+                            ),
                             onDismissed: (direction) {
                               musicplayer.playlistNames.remove(playlistName);
                               savePlaylistNames(null, musicplayer.playlistNames);
