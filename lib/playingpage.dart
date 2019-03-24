@@ -85,6 +85,7 @@ class PlayingPageState extends State<PlayingPage> {
             setState(() =>
             musicplayer.duration = musicplayer.audioPlayer.duration);
           } else if (s == AudioPlayerState.COMPLETED) {
+            print("aiiight");
             if (musicplayer.onPlayingPage == true) {
               if (musicplayer.currTrack != musicplayer.queueFileList.length - 1) {
                 musicplayer.currTrack++;
