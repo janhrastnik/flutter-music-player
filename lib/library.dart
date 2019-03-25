@@ -4,6 +4,7 @@ import 'dart:async';
 import 'musicplayer.dart' as musicplayer;
 import 'playingpage.dart';
 import 'package:audioplayer/audioplayer.dart';
+import 'dart:math';
 
 String img = "images/noimage.png";
 
@@ -21,6 +22,8 @@ class _LibraryState extends State<Library>{
   StreamSubscription _positionSubscription;
   StreamSubscription _audioPlayerStateSubscription;
   static const platform = const MethodChannel('demo.janhrastnik.com/info');
+  var r = Random();
+  int randnum;
 
   void onComplete() {
     // setState(() => musicplayer.playerState = PlayerState.stopped);
@@ -38,6 +41,7 @@ class _LibraryState extends State<Library>{
   void initState() {
     super.initState();
     initAudioPlayer();
+    randnum = r.nextInt(1000);
   }
 
   void initAudioPlayer() {
@@ -80,8 +84,8 @@ class _LibraryState extends State<Library>{
                   onTap: () {
                     Navigator.of(context).push(MaterialPageRoute(
                       builder: (BuildContext context) => PlayingPage(
-                        filePath: widget.musicFiles[musicplayer.currTrack],
-                        fileMetaData: widget.metadata[musicplayer.currTrack],
+                        filePath: musicplayer.queueFileList[musicplayer.currTrack],
+                        fileMetaData: musicplayer.queueMetaData[musicplayer.currTrack],
                         backPage: "libraryPage",
                       )
                     ));
@@ -98,12 +102,12 @@ class _LibraryState extends State<Library>{
                           ),
                           Expanded(
                             child: Text("${
-                                  widget.metadata[musicplayer.currTrack][0] != null
-                                      ? widget.metadata[musicplayer.currTrack][0]
-                                      : widget.musicFiles[musicplayer.currTrack]
+                                musicplayer.queueMetaData[musicplayer.currTrack][0] != null
+                                      ? musicplayer.queueMetaData[musicplayer.currTrack][0]
+                                      : musicplayer.queueFileList[musicplayer.currTrack]
                               } by ${
-                                  widget.metadata[musicplayer.currTrack][1] != null
-                                      ? widget.metadata[musicplayer.currTrack][1]
+                                musicplayer.queueMetaData[musicplayer.currTrack][1] != null
+                                      ? musicplayer.queueMetaData[musicplayer.currTrack][1]
                                       : "unknown"
                               }",
                                 style: TextStyle(
@@ -139,7 +143,7 @@ class _LibraryState extends State<Library>{
       return InkWell(
             child: Icon(Icons.play_arrow, size: 30.0,),
             onTap: () {
-              musicplayer.play(widget.musicFiles[musicplayer.currTrack]);
+              musicplayer.play(musicplayer.queueFileList[musicplayer.currTrack]);
               setState(() {
                 musicplayer.playerState = musicplayer.PlayerState.playing;
               });
@@ -175,7 +179,61 @@ class _LibraryState extends State<Library>{
                       child: ListView.builder(
                           itemCount: widget.musicFiles.length,
                           itemBuilder: (BuildContext context, int index) {
-                            return new ListTile(
+                            return index == 0 ? Column(
+                              children: <Widget>[
+                                ListTile(
+                                    leading: Icon(Icons.shuffle, size: MediaQuery.of(context).size.width/7),
+                                    title: Text("Shuffle All Songs"),
+                                  onTap: () {
+                                      List a = musicplayer.allFilePaths.map((e) => e).toList();
+                                      List b = [];
+                                      for (var data in musicplayer.allMetaData) {
+                                        var temp = data.map((e) => e).toList();
+                                        b.add(temp);
+                                      }
+                                      a.shuffle(Random(randnum));
+                                      b.shuffle(Random(randnum));
+                                      var shuffled = [a, b];
+                                      musicplayer.queueFileList = shuffled[0];
+                                      musicplayer.currTrack = 0;
+                                      musicplayer.queueMetaData = shuffled[1];
+                                      Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                              builder: (BuildContext context) => new PlayingPage(
+                                                filePath: shuffled[0][0],
+                                                fileMetaData: shuffled[1][0][0] != null ?
+                                                shuffled[1][0] :
+                                                [shuffled[0][0], "unknown"],
+                                                backPage: "libraryPage",
+                                              )
+                                          )
+                                      );
+                                  },
+                                ),
+                                ListTile(
+                                  leading: musicplayer.getImage(widget.metadata[index][2], context),
+                                  title: Text(widget.metadata[index][0]),
+                                  subtitle: Text(widget.metadata[index][1]),
+                                  onTap: () {
+                                    musicplayer.queueFileList = widget.musicFiles;
+                                    musicplayer.currTrack = index;
+                                    musicplayer.queueMetaData = widget.metadata;
+                                    Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                            builder: (BuildContext context) => new PlayingPage(
+                                              filePath: widget.musicFiles[index],
+                                              fileMetaData: widget.metadata[index][0] != null ?
+                                              widget.metadata[index] :
+                                              [widget.musicFiles[index], "unknown"],
+                                              backPage: "libraryPage",
+                                            )
+                                        )
+                                    );
+                                  },
+                                )
+
+                              ],
+                            ) : ListTile(
                               leading: musicplayer.getImage(widget.metadata[index][2], context),
                               title: Text(widget.metadata[index][0]),
                               subtitle: Text(widget.metadata[index][1]),

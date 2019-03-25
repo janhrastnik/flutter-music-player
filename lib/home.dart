@@ -68,6 +68,7 @@ class HomePageState extends State<HomePage> {
       musicplayer.playlistNames = l;
     });
     WidgetsBinding.instance.addPostFrameCallback((_) => scrollQueue());
+    musicplayer.hideAppBarAgain();
   }
 
   @override

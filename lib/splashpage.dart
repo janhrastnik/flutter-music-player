@@ -210,9 +210,9 @@ class SplashScreenState extends State<SplashScreen> {
             child: Padding(
               padding: EdgeInsets.all(12.0),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
-                  Image.asset("images/nanoicon256.png"),
+                  Image.asset("images/icon3-192.png"),
                   Padding(
                     padding: EdgeInsets.all(10.0),
                     child: CircularProgressIndicator(
