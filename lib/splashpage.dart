@@ -27,6 +27,7 @@ class SplashScreenState extends State<SplashScreen> {
   var path;
   String loadingTrack;
   double loadingTrackNumber = 0.0;
+  String sdCard;
 
   // used for app
   List _metaData = [];
@@ -117,14 +118,15 @@ class SplashScreenState extends State<SplashScreen> {
     writeStoredMetaData(mapMetaData);
     musicplayer.allMetaData = _metaData;
     musicplayer.allFilePaths = _musicFiles;
-    print(Directory(path).listSync().toString());
     onDoneLoading();
   }
 
   void getFiles() async {
+    await _getSdCard().then((data) {
+      sdCard = data;
+    });
     await getExternalStorageDirectory().then((data) {
       extDir2 = data;
-      setState(() {
         if (_musicFiles.isEmpty == true) {
           var mainDir = Directory(extDir2.path);
           List contents = mainDir.listSync(recursive: true);
@@ -133,21 +135,14 @@ class SplashScreenState extends State<SplashScreen> {
               _musicFiles.add(fileOrDir.path);
             }
           } // tries to find external sd card
-            try {
-              var extSdDir = Directory('/mnt/m_external_sd/download');
-              List sdContents = extSdDir.listSync(recursive: true);
-              for (var fileOrDir in sdContents) {
-                if (fileOrDir.path.toString().endsWith(".mp3")) {
-                  _musicFiles.add(fileOrDir.path);
-                }
-              }
-            } catch(e) {
-
-            }
         } else {
         }
-      });
     });
+    await runStream();
+  }
+
+  pass() {
+    return null;
   }
 
   Future _getAllMetaData() async {
@@ -183,6 +178,29 @@ class SplashScreenState extends State<SplashScreen> {
 
     }
     return value;
+  }
+
+  Future _getSdCard() async {
+    var value;
+    try {
+        value = await platform.invokeMethod("getSdCardPath");
+    } catch(e) {
+
+    }
+    return value;
+  }
+
+  runStream() async {
+    String sdCardDir = Directory(sdCard).parent.parent.parent.parent.path;
+    var extSdDir = Directory(sdCardDir);
+    Stream sdContents = extSdDir.list(recursive: true);
+    sdContents = sdContents.handleError((data) {
+    });
+    await for (var data in sdContents) {
+      if (data.path.endsWith(".mp3")) {
+        _musicFiles.add(data.path);
+      }
+    }
   }
 
   onDoneLoading() async {

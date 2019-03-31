@@ -44,6 +44,13 @@ public class MainActivity extends FlutterActivity {
           l.add(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM));
           l.add(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER));
           result.success(l);
+        } else if (methodCall.method.equals("getSdCardPath")) {
+          String removableStoragePath = null;
+          try {
+            removableStoragePath = getExternalCacheDirs()[1].toString();
+          } catch (Exception e) {
+          }
+          result.success(removableStoragePath);
         }
 
       }

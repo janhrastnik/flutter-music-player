@@ -14,6 +14,7 @@ class PlaylistPageState extends State<PlaylistPage> {
   final TextEditingController controller = TextEditingController();
   int counter = 0;
   int playlistLength = 0;
+  final key = GlobalKey<ScaffoldState>();
 
   void savePlaylistNames(String name, playlistNames) async {
     if (name != null) {
@@ -24,6 +25,7 @@ class PlaylistPageState extends State<PlaylistPage> {
   }
 
   void createPlaylist() {
+    _name = null;
     AlertDialog dialog = AlertDialog(
         title: Text("test"),
         content: Column(
@@ -62,6 +64,9 @@ class PlaylistPageState extends State<PlaylistPage> {
                             name: _name,
                             tracklist: [],
                           )));
+                } else {
+                  Navigator.of(context, rootNavigator: true).pop('dialog');
+                  key.currentState.showSnackBar(SnackBar(content: Text("Playlist name can't be empty.")));
                 }
               },
             )
@@ -81,6 +86,7 @@ class PlaylistPageState extends State<PlaylistPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: key,
         floatingActionButton: FloatingActionButton(
           child: Center(
             child: Text(

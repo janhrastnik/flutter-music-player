@@ -9,6 +9,8 @@ import 'package:audioplayer/audioplayer.dart';
 import 'playlistpage.dart';
 import 'package:random_color/random_color.dart';
 import 'artistpage.dart';
+import 'wave.dart';
+import 'config.dart';
 
 class PlayingPage extends StatefulWidget {
   var filePath;
@@ -318,9 +320,28 @@ class PlayingPageState extends State<PlayingPage> {
                       )
                   ),
                   Container(
+                    padding: EdgeInsets.only(top: MediaQuery.of(context).size.width/12),
                     color: Colors.white,
-                    padding: EdgeInsets.only(bottom: MediaQuery.of(context).size.width/6,),
-                    child: null,
+                    child: musicplayer.playerState == musicplayer.PlayerState.playing ? WaveWidget(
+                      config: CustomConfig(
+                        gradients: [
+                          [pageColor, pageColor],
+                          [pageColor, pageColor],
+                          [pageColor, pageColor],
+                          [pageColor, pageColor]
+                        ],
+                        durations: [2400, 2400, 2400, 2400],
+                        heightPercentages: [0.23, 0.23, 0.23, 0.23],
+                        gradientBegin: Alignment.bottomLeft,
+                        gradientEnd: Alignment.topRight,
+                      ),
+                      waveAmplitude: 0,
+                      backgroundColor: Colors.white,
+                      size: Size(
+                        double.infinity,
+                        MediaQuery.of(context).size.width/12,
+                      ),
+                    ) : Container(color: Colors.white, height: MediaQuery.of(context).size.width/12, child: null,),
                   ),
                 ],
               ),
@@ -333,7 +354,7 @@ class PlayingPageState extends State<PlayingPage> {
                         child: Padding(
                           padding: EdgeInsets.only(
                             left: MediaQuery.of(context).size.width/20,
-                            right: MediaQuery.of(context).size.width/20
+                            right: MediaQuery.of(context).size.width/20,
                           ),
                           child: Text(
                             widget.fileMetaData[0],
