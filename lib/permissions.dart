@@ -28,6 +28,8 @@ class GetPermissionsState extends State<GetPermissions> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold();
+    return Scaffold(
+      body: Center(child: Image.asset("images/icon3-192.png"),),
+    );
   }
 }

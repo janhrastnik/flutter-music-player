@@ -1,4 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="janhrastnik.musicplayer2">
 
     <!-- The INTERNET permission is required for development. Specifically,
@@ -16,7 +17,8 @@
     <application
         android:name="io.flutter.app.FlutterApplication"
         android:label="Nano Music Player"
-        android:icon="@mipmap/icon">
+        android:icon="@mipmap/icon"
+        tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"

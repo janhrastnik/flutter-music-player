@@ -168,9 +168,7 @@ class SplashScreenState extends State<SplashScreen> {
     var value;
     try {
       if (mapMetaData[track] == null) {
-        value = await platform.invokeMethod("getMetaData", <String, dynamic>{
-          'filepath': track
-        });
+        value = await platform.invokeMethod("getMetaData",);
       } else {
         value = mapMetaData[track];
       }
