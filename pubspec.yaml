@@ -25,6 +25,7 @@ dependencies:
   shared_preferences: ^0.4.3
   random_color: ^1.0.3
   crypto: ^2.0.6
+  mp3editor: ^0.0.1
 
 dev_dependencies:
   flutter_test:

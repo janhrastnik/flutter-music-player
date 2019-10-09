@@ -11,6 +11,7 @@ import 'package:random_color/random_color.dart';
 import 'artistpage.dart';
 import 'wave.dart';
 import 'config.dart';
+import 'package:mp3editor/mp3editor.dart';
 
 class PlayingPage extends StatefulWidget {
   var filePath;
@@ -66,6 +67,9 @@ class PlayingPageState extends State<PlayingPage> {
       img = Image(image: missingImg,);
     }
     musicplayer.onPlayingPage = true;
+    Mp3editor.getTitle(widget.filePath).then((data) {
+      print("THE TITLE IS " + data);
+    });
   }
 
   @override
