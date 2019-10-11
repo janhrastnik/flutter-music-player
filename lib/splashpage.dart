@@ -138,7 +138,11 @@ class SplashScreenState extends State<SplashScreen> {
         } else {
         }
     });
-    await runStream();
+    try {
+      await runStream();
+    } catch(e) {
+      print(e);
+    }
   }
 
   pass() {
@@ -168,12 +172,14 @@ class SplashScreenState extends State<SplashScreen> {
     var value;
     try {
       if (mapMetaData[track] == null) {
-        value = await platform.invokeMethod("getMetaData",);
+        value = await platform.invokeMethod("getMetaData", <String, dynamic>{
+          'filepath': track
+        });
       } else {
         value = mapMetaData[track];
       }
     } catch(e) {
-
+      print(e);
     }
     return value;
   }
@@ -183,7 +189,7 @@ class SplashScreenState extends State<SplashScreen> {
     try {
         value = await platform.invokeMethod("getSdCardPath");
     } catch(e) {
-
+      print(e);
     }
     return value;
   }

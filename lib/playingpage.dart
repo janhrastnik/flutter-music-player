@@ -291,6 +291,9 @@ class PlayingPageState extends State<PlayingPage> {
                     setState(() {
                       saveFavTrack(widget.filePath, musicplayer.favList);
                       isFavorited = true;
+                      musicplayer.getFavTrackList().then((l) {
+                        musicplayer.favList = l;
+                      });
                     });
                   }
                 }
