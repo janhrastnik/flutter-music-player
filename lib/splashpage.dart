@@ -8,6 +8,7 @@ import 'musicplayer.dart' as musicplayer;
 import 'home.dart';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
+import 'package:mp3editor/mp3editor.dart';
 
 class SplashScreen extends StatefulWidget {
 
@@ -138,7 +139,11 @@ class SplashScreenState extends State<SplashScreen> {
         } else {
         }
     });
-    await runStream();
+    try {
+      await runStream();
+    } catch(e) { // if sdcard isn't found
+      print(e);
+    }
   }
 
   pass() {
@@ -148,6 +153,7 @@ class SplashScreenState extends State<SplashScreen> {
   Future _getAllMetaData() async {
     for (var track in _musicFiles) {
       var data = await _getFileMetaData(track);
+      print("DATA IS $data");
       updateLoadingTrack(track, _musicFiles.indexOf(track), _musicFiles.length);
       if (data[2] != null) {
         if (data[2] is List<int>) {
@@ -165,15 +171,21 @@ class SplashScreenState extends State<SplashScreen> {
   }
 
   Future _getFileMetaData(track) async {
-    var value;
+    List value = List();
     try {
       if (mapMetaData[track] == null) {
-        value = await platform.invokeMethod("getMetaData",);
+        print("you should see this");
+        value.add(await Mp3editor.getTitle(track));
+        value.add(await Mp3editor.getArtist(track));
+        value.add(null); // TODO: implement image method
+        value.add(await Mp3editor.getAlbum(track));
+        value.add(await Mp3editor.getTrackNumber(track));
+        print("value is $value");
       } else {
         value = mapMetaData[track];
       }
     } catch(e) {
-
+        print(e);
     }
     return value;
   }
