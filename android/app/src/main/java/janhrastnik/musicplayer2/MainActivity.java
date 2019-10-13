@@ -39,7 +39,7 @@ public class MainActivity extends FlutterActivity {
           try {
             l.add(mmr.getEmbeddedPicture());
           } catch (Exception e) {
-            l.add("");
+            l.add(null);
           }
           l.add(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM));
           l.add(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER));

@@ -9,6 +9,7 @@ import 'library.dart';
 import 'package:random_color/random_color.dart';
 import 'artistpage.dart';
 import 'package:flutter/services.dart';
+import 'dart:io';
 String img = "images/noimage.png";
 // for playlists, play queue
 List queueFileList;
@@ -104,12 +105,12 @@ Future stop() async {
 }
 
 getImage(imageHash, context) {
-  if (imageHash != null) {
-    var imageData = appPath + "/" + imageHash;
-    return Image.asset(imageData, width: MediaQuery.of(context).size.width/7,);
-  } else {
-    return Image.asset(img, width: MediaQuery.of(context).size.width/7);
+  if (imageHash == null) {
+    imageHash = "";
   }
+  String imageData = appPath + "/" + imageHash;
+  File f = File(imageData);
+  return f.existsSync() ? Image(image: FileImage(f)) : Image.asset(img, width: MediaQuery.of(context).size.width/7);
 }
 
 class AppDrawer extends StatelessWidget {

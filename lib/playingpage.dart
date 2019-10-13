@@ -11,6 +11,7 @@ import 'package:random_color/random_color.dart';
 import 'artistpage.dart';
 import 'wave.dart';
 import 'config.dart';
+import 'dart:io';
 
 class PlayingPage extends StatefulWidget {
   var filePath;
@@ -59,12 +60,7 @@ class PlayingPageState extends State<PlayingPage> {
       musicplayer.favList = l;
     });
     musicplayer.currTrackName = widget.filePath;
-    if (widget.fileMetaData[2] != null) {
-      var imageData = musicplayer.appPath + "/" + widget.fileMetaData[2];
-      img = Image.asset(imageData, width: 300.0);
-    } else {
-      img = Image(image: missingImg,);
-    }
+
     musicplayer.onPlayingPage = true;
   }
 
@@ -232,6 +228,7 @@ class PlayingPageState extends State<PlayingPage> {
 
   @override
   Widget build(BuildContext context) {
+    img = musicplayer.getImage(widget.fileMetaData[2], context);
     return Scaffold(
         key: key,
         drawer: musicplayer.AppDrawer(),
@@ -316,7 +313,11 @@ class PlayingPageState extends State<PlayingPage> {
                 children: <Widget>[
                   Container(
                       color: Colors.white,
-                      child: img,
+                      child: Container(
+                        width: 300.0,
+                        height: 300.0,
+                        child: img,
+                      ),
                       padding: EdgeInsets.only(
                         left: MediaQuery.of(context).size.width/6,
                         right: MediaQuery.of(context).size.width/6,

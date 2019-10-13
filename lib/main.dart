@@ -10,6 +10,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     musicplayer.hideAppBar();
     return MaterialApp(
+      title: "Nano Music Player",
       debugShowCheckedModeBanner: false,
       home: GetPermissions(),
     );

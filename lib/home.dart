@@ -49,8 +49,9 @@ class HomePageState extends State<HomePage> {
   }
 
   scrollQueue() { // scrolls to current track
+    // TODO: test if this really works
     try {
-      _scrollController.jumpTo(musicplayer.currTrack * 108.0);
+      _scrollController.jumpTo(musicplayer.currTrack * (MediaQuery.of(context).size.width/4 + 24.0));
     } catch(e) {
 
     }
@@ -108,10 +109,12 @@ class HomePageState extends State<HomePage> {
                                       children: <Widget>[
                                         musicplayer.queueMetaData[index][2] != "" ? Padding(
                                             padding: EdgeInsets.all(8.0),
-                                            child: musicplayer.getImage(
+                                            child: Container(width: MediaQuery.of(context).size.width/4,
+                                              height: MediaQuery.of(context).size.width/4,
+                                               child: musicplayer.getImage(
                                                 musicplayer.queueMetaData[index][2],
                                                 context
-                                            )
+                                            ),)
                                         )
                                             : Container(),
                                         Container(
