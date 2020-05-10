@@ -4,7 +4,3 @@ Simple local music player built with flutter. It uses the [audioplayer](https://
 
 # Screenshots
 <img src="screenshots/1.png" height="480px" hspace="10"><img src="screenshots/2.png" height="480px" hspace="10"><img src="screenshots/3.png" height="480px" hspace="10">
-## Getting Started
-
-For help getting started with Flutter, view our online
-[documentation](https://flutter.io/).
